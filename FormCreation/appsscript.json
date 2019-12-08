@@ -1,0 +1,10 @@
+{
+  "timeZone": "Europe/Paris",
+  "dependencies": {
+  },
+  "exceptionLogging": "STACKDRIVER",
+  "oauthScopes": ["https://www.googleapis.com/auth/script.external_request",
+                 "https://www.googleapis.com/auth/sqlservice",
+                 "https://www.googleapis.com/auth/forms",
+                 "https://www.googleapis.com/auth/forms.currentonly"]
+}
