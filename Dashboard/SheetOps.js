@@ -23,11 +23,9 @@ function showAlert() {
   }
 }
 
-// Unused
+
 function writeArrayToCell(array, cellRow, cellCol) {
   var sheet = SpreadsheetApp.getActiveSheet();
   var cell = sheet.getRange(cellRow, cellCol);
   cell.setValue(array.toString());
 }
-
-  

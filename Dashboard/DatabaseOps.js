@@ -9,6 +9,16 @@ function load() {
   con.close();
 }
 
+function establishDbConnection() {
+  var user = 'root';
+  var schema = 'tidab_quality';
+  var password = getPassword();
+  var subname = 'lustrous-aleph-260112:europe-north1:tidab-quality'; // Subname is called Instance connection name in console overview
+  var dbUrl = 'jdbc:google:mysql://' + subname + '/' + schema;
+  
+  var con = Jdbc.getCloudSqlConnection(dbUrl, user, password);
+  return con;
+}
 
 function loadKurser(con) {
   var kurser = retrieveKursFromDb(con);  
@@ -58,11 +68,7 @@ function retrieveKursLarMal(connection, exMal, kursKod) {
     return [];
   }
   
-  var query = "SELECT CONCAT(examensmal,'.',bloom,'.',nummer) AS larandemal FROM larandemal WHERE examensmal = ? AND id IN " + 
-    "(SELECT larandemal FROM enkatfraga WHERE id IN " +
-      "(SELECT enkatfraga FROM enkatfragesvar WHERE svar = TRUE AND respons IN " + 
-        "(SELECT id FROM respons WHERE kurskod = ?))) " + 
-          "ORDER BY examensmal, bloom, nummer";
+  var query = "SELECT CONCAT(examensmal,'.',bloom,'.',nummer) AS larandemal FROM larandemal WHERE examensmal = ? AND id IN (SELECT larandemal FROM enkatfraga WHERE id IN (SELECT enkatfraga FROM enkatfragesvar WHERE svar = TRUE AND respons IN (SELECT id FROM respons WHERE kurskod = ?)))"
   var statement = connection.prepareStatement(query);
   statement.setInt(1, exMal);
   statement.setString(2, kursKod);
