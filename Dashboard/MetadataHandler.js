@@ -1,17 +1,60 @@
-// hard coded range
-function setDevData() {
+function setDevDataRow(row) {
+  // row = 4;
+  var rowA1Notation = row + ':' + row;
   var sheet = SpreadsheetApp.getActiveSheet();
-  var range = sheet.getRange('4:4');
+  var range = sheet.getRange(rowA1Notation);
   range.addDeveloperMetadata('kurs', 'IE1204');
 }
-// hard coded range
-function getDevData() {
+
+function getDevDataRow(row) {
+  // row = 4; 
+  var rowA1Notation = row + ':' + row;
   var sheet = SpreadsheetApp.getActiveSheet();
-  var range = sheet.getRange('4:4');
+  var range = sheet.getRange(rowA1Notation);
   var metaData = range.createDeveloperMetadataFinder().find();
   for(var i = 0; i < metaData.length; i++) {
     Logger.log(metaData[i].getKey() + ": " + metaData[i].getValue());
   }
+}
+
+function setDevDataSheet(key, value){
+  var sheet = SpreadsheetApp.getActiveSheet();
+  
+  sheet.addDeveloperMetadata(key, value);
+}
+
+function getDevDataSheet(key) {
+  var sheet = SpreadsheetApp.getActiveSheet();
+  
+  var metadata = sheet.getDeveloperMetadata();
+  
+  for(var i = 0; metadata.length; i++) {
+    if(metadata[i].getKey() == key) {
+      return metadata[i].getValue();
+    }
+  }
+}
+
+function setEduProgramDataOnSheet() {
+  var eduProgram = 'TIDAB';
+  var year = 2017;
+  var sheet = SpreadsheetApp.getActiveSheet();
+  
+  sheet.addDeveloperMetadata('eduProgramTitle', eduProgram);
+  sheet.addDeveloperMetadata('eduProgramYear', year);
+}
+
+function getEduProgramDataFromSheet(sheet) {
+  var metadata = sheet.getDeveloperMetadata();
+  for(var i = 0; i < metadata.length; i++) {
+    if(metadata[i].getKey() == mdKey.programTitle) {
+      var program = metadata[i].getValue();
+    } else if (metadata[i].getKey() == mdKey.programYear) {
+      var year = metadata[i].getValue();
+    }
+  }
+  
+  return {'eduProgramTitle':program, 'eduProgramYear':year};
 }
 
 // Set DeveloperMetadata in "Spreadsheet" scope
@@ -24,6 +67,14 @@ function setDevDataSpreadsheet() {
 function getDevDataSpreadsheet() {
   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   var metadata = spreadsheet.getDeveloperMetadata();
+  for(var i = 0; i < metadata.length; i++) {
+    Logger.log(metadata[i].getKey() + ": " + metadata[i].getValue());
+  }
+}
+
+function logDevDataSheet() {
+  var sheet = SpreadsheetApp.getActiveSheet();
+  var metadata = sheet.getDeveloperMetadata();
   for(var i = 0; i < metadata.length; i++) {
     Logger.log(metadata[i].getKey() + ": " + metadata[i].getValue());
   }

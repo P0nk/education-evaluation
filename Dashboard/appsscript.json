@@ -8,10 +8,8 @@
     }]
   },
   "exceptionLogging": "STACKDRIVER",
-  "oauthScopes": [
-    "https://www.googleapis.com/auth/script.external_request",
-    "https://www.googleapis.com/auth/sqlservice",
-    "https://www.googleapis.com/auth/spreadsheets.currentonly"
-  ]
+  "oauthScopes": ["https://www.googleapis.com/auth/script.external_request",
+                 "https://www.googleapis.com/auth/spreadsheets",
+                 "https://www.googleapis.com/auth/spreadsheets.currentonly",
+                 "https://www.googleapis.com/auth/sqlservice"]
 }
-
