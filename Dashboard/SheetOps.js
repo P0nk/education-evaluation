@@ -1,9 +1,15 @@
 function onOpen() {
   var ui = SpreadsheetApp.getUi();
-  // Or DocumentApp or FormApp.
+  // Or DocumentApp or FormApp.  
   ui.createMenu('Dashboard')
-      .addItem('Load data', 'showAlert').addItem('Initialize sheet', 'initializeSheet')
+      .addItem('Load data', 'showAlert')
+      .addItem('Initialize sheet', 'initializeSheet')
+      .addItem('CalculateBloomLevels', 'calculateBloom')
       .addToUi(); 
+}
+
+function calculateBloom(){
+ setBloomColors(SpreadsheetApp.getActiveSheet().getRange(3,2,21,11))
 }
 
 function showAlert() {

@@ -4,15 +4,9 @@ function load() {
   var programData = getEduProgramDataFromSheet(sheet);
   var sheetData = retrieveKurserForProgram(con, programData.eduProgramTitle, programData.eduProgramYear);
   writeSheetData(sheetData);
-  /*
-  var kurser = loadKurser(con);
-  loadLarMal(con, 1, kurser);
-  loadLarMal(con, 2, kurser);
-  */
-  
+  setBloomColors(SpreadsheetApp.getActiveSheet().getRange(3,2,21,12))  
   con.close();
 }
-
 
 function initialize(con) {
   var kurser = retrieveKursFromDb(con);  
