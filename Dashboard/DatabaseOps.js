@@ -2,13 +2,48 @@ function load() {
   var con = establishDbConnection();
   
   var kurser = loadKurser(con);
+  var examensmal = loadExamensmal(con);
   loadLarMal(con, 1, kurser);
   loadLarMal(con, 2, kurser);
+  //SpreadsheetApp.getUi().alert(SpreadsheetApp.getActiveSheet().getRange(5,2));
+  //SpreadsheetApp.getActiveSheet().getRange(5,2)
+  //SpreadsheetApp.getUi().alert(kurser.length);
+  //SpreadsheetApp.getUi().alert(examensmal.length);
+  setBloomColors(SpreadsheetApp.getActiveSheet().getRange(3,2,kurser.length, examensmal.length))
   
   
   con.close();
 }
 
+
+function loadExamensmal(con){
+
+  var examensmal = retrieveExamensmalFromDb(con);
+  
+  return examensmal; 
+  
+}
+
+
+
+//Examensmal 
+function retrieveExamensmalFromDb(con) {
+  var statement = con.createStatement();
+  var query = "SELECT nummer FROM examensmal";
+  var resultSet = statement.executeQuery(query);
+  
+  var examensmal = [];
+  while(resultSet.next()) {
+    var examensmalNummer = resultSet.getString(1);
+    examensmal.push([examensmalNummer]);
+  }
+  
+  resultSet.close();
+  statement.close();
+  return examensmal;
+  
+
+}
 
 function loadKurser(con) {
   var kurser = retrieveKursFromDb(con);  
