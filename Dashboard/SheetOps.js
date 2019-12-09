@@ -3,7 +3,13 @@ function onOpen() {
   // Or DocumentApp or FormApp.
   ui.createMenu('Interact')
       .addItem('Load', 'showAlert')
+      .addItem('CalculateBloomLevels', 'calculateBloom')
+  
       .addToUi(); 
+}
+
+function calculateBloom(){
+ setBloomColors(SpreadsheetApp.getActiveSheet().getRange(3,2,21,11))
 }
 
 function showAlert() {
