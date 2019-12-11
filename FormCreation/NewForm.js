@@ -1,17 +1,20 @@
 // 1. Copy template 
 // 2. Move to correct folder in Drive
 function createNewForm() {
-  var templateFile = DriveApp.getFileById(drive.templateFormId);
-  var templateCopy = templateFile.makeCopy().setName(getNewFileTitle()).getId();
-  moveFile(templateCopy, drive.generatedFormFolderId);
-  var newForm = FormApp.openById(templateCopy);
-  return newForm;
+  var form = FormApp.create(getNewFileTitle());
+  moveFile(form.getId(), drive.generatedFormFolderId);
+  // Remains from when a template was used
+  //var templateFile = DriveApp.getFileById(drive.templateFormId);
+  //var templateCopy = templateFile.makeCopy().setName(getNewFileTitle()).getId();
+  // moveFile(templateCopy, drive.generatedFormFolderId); // Not necessary if template file is in same folder
+  setDestinationSheet(form);
+  return form;
 }
 
 // Create the basic structure of the form. This includes title, description, 'kurs' question, 'name' question
 function createFormSkeleton(form) {
   form.setTitle(newForm.title);
-  form.setDescription(newForm.description);
+  form.setDescription(newForm.desc);
   
   var itemKurs = form.addTextItem();
   itemKurs.setTitle(newForm.kursTitle);
@@ -35,8 +38,9 @@ function fillForm(form, mainQuestions, subQuestions) {
        continue;
     }
        
-    var title = newForm.questionTitlePrefix + mainQuestions[i];
-    form.addPageBreakItem().setTitle(title);
+    var title = newForm.questionTitlePrefix + mainQuestions[i].number;
+    var description = mainQuestions[i].desc;
+    form.addPageBreakItem().setTitle(title).setHelpText(description);
     
     for(var j = 0; j < subQuestions[i].length; j++) {
       if(!Array.isArray(subQuestions[i][j]) || !subQuestions[i][j]) {
@@ -44,7 +48,8 @@ function fillForm(form, mainQuestions, subQuestions) {
       }
       
       var item = form.addCheckboxItem();
-      item.setTitle(getBloomTitle(j+1));
+      var itemTitle = newForm.questionPrefix + j + newForm.questionSeparator + getBloomTitle(j);
+      item.setTitle(itemTitle);
       
       var choices = [];
       for(var k = 0; k < subQuestions[i][j].length; k++) {
@@ -60,11 +65,6 @@ function fillForm(form, mainQuestions, subQuestions) {
   return form;
 }
 
-
-
-
-
-
 function getNewFileTitle() {
   var date = new Date();
   var curDayMonth = date.getDate() + '/' + (date.getMonth()+1) + '/' + date.getYear();
@@ -74,6 +74,34 @@ function getNewFileTitle() {
   return title;
 }
 
+// Sets and renames
+function setDestinationSheet(form) {
+  form.setDestination(FormApp.DestinationType.SPREADSHEET, drive.formDestinationSpreadsheet);
+  var formFileName = DriveApp.getFileById(form.getId()).getName();
+  var formUrl = trimUrl(form.getEditUrl()); 
+  Logger.log('Form url: %s', formUrl);
+  
+  var destinationSheet = SpreadsheetApp.openById(drive.formDestinationSpreadsheet);
+  destinationSheet.getSheets().forEach(function(sheet){
+    var sheetUrl = sheet.getFormUrl();
+    Logger.log('Sheet url: %s', sheetUrl);
+    
+    if(sheetUrl) { // null if no connected form
+      sheetUrl = trimUrl(sheetUrl);
+    }
+    
+    if (sheetUrl  === formUrl) {
+      sheet.setName(formFileName);
+      Logger.log('URLs are equal');
+    }
+  });
+}
+
+function checkUrl() {
+}
+
+
+// Unused
 function onGeneratedFormSubmit(e) {
   var authMode = e.authMode;
   Logger.log(authMode);

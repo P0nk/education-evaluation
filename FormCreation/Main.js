@@ -1,25 +1,25 @@
 function onFormSubmit(e) {
-  //var answers = parseFormResponse(e.response);
-  //Logger.log(answers);
-  var answers = [1];
-  
-  if(answers.length < 1){
+  var subjects = parseFormResponse(e.response);
+  if(subjects.length < 1){
     return;
   }
   
   var con = establishDbConnection();
-  var questionData = retrieveQuestionData(con, answers);
-  Logger.log(questionData);
+  var questionData = retrieveQuestionData(con, subjects);
   
   // Skip form creation if no available data about larandemal in database
   if(questionData[0] < 1) {
     return;
   }
   
+  var subjectData = retrieveSubjectData(con, subjects);
   var newForm = createNewForm();
   var formSkeleton = createFormSkeleton(newForm);
-  var form = fillForm(formSkeleton, answers, questionData);
-  
+  var form = fillForm(formSkeleton, subjectData, questionData);
+  if(saveNewForm(con, form)){
+    Logger.log('Form stored in the database %s', form.getId());
+  }
+  // TODO store formId as metadata in destination sheet
   con.close();
   
 //  var trigger = ScriptApp.newTrigger('onGeneratedFormSubmit').forForm(form).onFormSubmit().create();
@@ -29,13 +29,19 @@ function onFormSubmit(e) {
   // Add description to each PageBreakItem; provide link to document with info about examensmal and its larandemal (not yet available)
 }
 
-// Extract examensmal numbers from question items
+// Extract examensmal numbers from question items.
 function parseFormResponse(formResponse) {
+  return parseFormResponseSingleSelection(formResponse);
+}
+
+function parseFormResponseMultiChoice(formResponse) {
   var itemResponses = formResponse.getItemResponses();
   var providedNumbers = [];
   
   for (var i = 0; i < itemResponses.length; i++) {
     var itemResponse = itemResponses[i];
+    Logger.log(itemResponse.getItem().getTitle()); 
+    continue;
     var subResponse = itemResponse.getResponse();
     
     for(var j = 0; j < subResponse.length; j++) {
@@ -47,16 +53,15 @@ function parseFormResponse(formResponse) {
   return providedNumbers;
 }
 
-// Used to extract '3' from 'Examensmål 3' for example
-function extractFirstNumber(text) {
-  if(typeof text != 'string') {
-    return;
-  }
+function parseFormResponseSingleSelection(formResponse) {
+  var itemResponses = formResponse.getItemResponses();
+  var selection = itemResponses[0];
+  var selectionText = selection.getResponse();
+  var extractedNumber = extractFirstNumber(selectionText);
   
-  var regexp = /\d+/;
-  var value = regexp.exec(text)[0];
-  return value;
+  return [extractedNumber];
 }
+
 
 // Manual test function
 function testRetrieveQuestionData() {

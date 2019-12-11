@@ -3,8 +3,6 @@
 // 2nd dim: bloom level
 // 3rd dim: larandemal
 function retrieveQuestionData(con, questions) {
-  var con = establishDbConnection();
-  var questions = [1];
   var query = 
     "SELECT bloom, nummer, beskrivning " + 
     "FROM larandemal lmOuter " + 
@@ -36,5 +34,54 @@ function retrieveQuestionData(con, questions) {
     rs.close();
     statement.clearParameters();
   }
+  
+  statement.close();
   return subQuestions;
+}
+
+function retrieveSubjectData (con, subjects) {
+  var query = 
+      'SELECT nummer, beskrivning ' + 
+      'FROM examensmal ' + 
+      'WHERE nummer = ?';
+  var statement = con.prepareStatement(query);
+  
+  var subjectData = [];
+  for(var i = 0; i < subjects.length; i++) {
+    if(typeof (subjects[i]) != 'number') {
+      Logger.log('%s is not a number. Continuing...', subjects[i]);
+      Logger.log(typeof (subjects[i]));
+      continue;
+    }
+    
+    statement.setInt(1, subjects[i]);
+    var rs = statement.executeQuery();
+    
+    if(rs.next()) {
+      var subjectNumber = rs.getInt(1);
+      var subjectDesc = rs.getString(2);
+      subjectData[i] = {'number':subjectNumber, 'desc':subjectDesc};
+      Logger.log(subjectData[i]);
+    }
+    
+    rs.close();
+    statement.clearParameters();
+  }
+  
+  statement.close();
+  Logger.log(subjectData);
+  return subjectData;
+}
+
+function saveNewForm(con, form) {
+  var formId = form.getId();
+  var query = 
+      'INSERT INTO enkat(form_id)' +
+      'VALUES(?)';
+  var statement = con.prepareStatement(query);
+  statement.setString(1, formId);
+  var success = statement.executeUpdate();
+  
+  statement.close();
+  return success;
 }

@@ -5,10 +5,13 @@ var newForm = {
   kursDesc: 'Till exempel "IV1350"',
   nameTitle: 'Ange ditt namn',
   nameDesc: 'För- och efternamn',
-  questionTitlePrefix: 'Examensmål '
+  questionTitlePrefix: 'Examensmål ',
+  questionPrefix: 'Nivå ',
+  questionSeparator: ': '
 }
 
 var drive = {
   templateFormId: '17Kac11twcU6GQWBDi1_XxuqCSMxotjOUk5wEGZxWuhs',
-  generatedFormFolderId: '1KULj-zDtVi32m3EoYwxG0UvDHzO7CzBu'
+  generatedFormFolderId: '1KULj-zDtVi32m3EoYwxG0UvDHzO7CzBu',
+  formDestinationSpreadsheet: '1AKkBAjYHo3ChPA7wCshrVcnShqwznv36wvrLNSJnsDo'
 }
