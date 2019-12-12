@@ -16,16 +16,21 @@ function createFormSkeleton(form) {
   form.setTitle(newForm.title);
   form.setDescription(newForm.desc);
   
-  var itemKurs = form.addTextItem();
-  itemKurs.setTitle(newForm.kursTitle);
-  itemKurs.setHelpText(newForm.kursDesc);
-  itemKurs.setRequired(true);
-  
   var itemNamn = form.addTextItem();
   itemNamn.setTitle(newForm.nameTitle);
   itemNamn.setHelpText(newForm.nameDesc);
   itemNamn.setRequired(true);
   
+  var itemKurs = form.addTextItem();
+  var pattern = newForm.kursPattern;
+  var kursValidation = FormApp.createTextValidation()
+      .requireTextMatchesPattern(newForm.kursPattern)
+      .setHelpText(newForm.kursPatternDesc);
+  itemKurs.setValidation(kursValidation);
+  itemKurs.setTitle(newForm.kursTitle);
+  itemKurs.setHelpText(newForm.kursDesc);
+  itemKurs.setRequired(true);
+
   return form;
 }
 
@@ -68,7 +73,11 @@ function fillForm(form, mainQuestions, subQuestions) {
 function getNewFileTitle() {
   var date = new Date();
   var curDayMonth = date.getDate() + '/' + (date.getMonth()+1) + '/' + date.getYear();
-  var curTime = date.getHours() + ':' + date.getMinutes();
+  var minutes = date.getMinutes;
+  if(minutes < 10) {
+    minutes = '0' + minutes;
+  }
+  var curTime = date.getHours() + ':' + minutes;
   var title = Utilities.formatString('Formulär - %s %s', curDayMonth, curTime);
   
   return title;
@@ -81,8 +90,8 @@ function setDestinationSheet(form) {
   var formUrl = trimUrl(form.getEditUrl()); 
   Logger.log('Form url: %s', formUrl);
   
-  var destinationSheet = SpreadsheetApp.openById(drive.formDestinationSpreadsheet);
-  destinationSheet.getSheets().forEach(function(sheet){
+  var destinationSpreadsheet = SpreadsheetApp.openById(drive.formDestinationSpreadsheet);
+  destinationSpreadsheet.getSheets().forEach(function(sheet){
     var sheetUrl = sheet.getFormUrl();
     Logger.log('Sheet url: %s', sheetUrl);
     
@@ -92,6 +101,8 @@ function setDestinationSheet(form) {
     
     if (sheetUrl  === formUrl) {
       sheet.setName(formFileName);
+      // Loose protecion of column titles
+      sheet.getRange('1:1').protect().setWarningOnly(true);
       Logger.log('URLs are equal');
     }
   });

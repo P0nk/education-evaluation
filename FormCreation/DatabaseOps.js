@@ -4,7 +4,7 @@
 // 3rd dim: larandemal
 function retrieveQuestionData(con, questions) {
   var query = 
-    "SELECT bloom, nummer, beskrivning " + 
+    "SELECT bloom, nummer, beskrivning, id " + 
     "FROM larandemal lmOuter " + 
     "WHERE examensmal = ? " + 
       "AND version IN (SELECT MAX(version) FROM larandemal lmInner WHERE lmOuter.id = lmInner.id) " + 
@@ -22,7 +22,8 @@ function retrieveQuestionData(con, questions) {
       var bloom = rs.getInt(1);
       var number = rs.getInt(2);
       var description = rs.getString(3);
-      var dataTransferObj = {bloom:bloom, number:number, description:description};
+      var id = rs.getInt(4);
+      var dataTransferObj = {bloom:bloom, number:number, description:description, id:id};
       
       if(!Array.isArray(subQuestions[i][bloom]) || !subQuestions[i][bloom].length) {
         subQuestions[i][bloom] = [dataTransferObj];
@@ -84,4 +85,79 @@ function saveNewForm(con, form) {
   
   statement.close();
   return success;
+}
+
+function testGetSubQuestionIds() {
+  var con = establishDbConnection();
+  var examensmal = 1;
+  var larandemal = getSubQuestionIds(con, examensmal);
+  Logger.log(larandemal);
+}
+
+function getSubQuestionIds(con, mainQuestion) {
+  var query = 
+    "SELECT id " + 
+    "FROM larandemal lmOuter " + 
+    "WHERE examensmal = ? " + 
+      "AND version IN (SELECT MAX(version) FROM larandemal lmInner WHERE lmOuter.id = lmInner.id) " + 
+    "ORDER BY id";
+  var statement = con.prepareStatement(query);
+  statement.setInt(1, mainQuestion);
+  var rs = statement.executeQuery();
+  
+  var ids = [];
+  while(rs.next()) {
+    var id = rs.getInt(1);
+    ids.push(id);
+  }
+  
+  rs.close();
+  statement.close();
+  
+  return ids;
+}
+
+// UNTESTED.
+// Can either parse questionData (which is error prone due to large 3d array),
+// or do an extra call to db to fetch only pure ids, making this function much simpler
+function saveNewFormQuestions(con, formId, questionIds) {
+  var query = 
+      'INSERT INTO enkatfraga(enkat, larandemal) ' + 
+      'VALUES ((SELECT id FROM enkat WHERE form_id = ?), ?)'; 
+  var statement = con.prepareStatement(query);
+  statement.setString(1, formId);
+  
+  /* Simple method using array of ids */
+  for(var i = 0; i < questionIds.length; i++) {
+    var id = questionIds[i];
+    statement.setInt(2, id);
+    statement.addBatch();
+  }
+  
+  /* Clunky method of parsing questionData
+  for(var i = 0; i < questionData.length; i++) {
+    if(!Array.isArray(questionData[i])){
+       continue;
+    }
+    
+    for(var j = 0; j < questionData[i].length; j++) {
+      if(!Array.isArray(questionData[i][j])){
+        continue;         
+      }
+      
+      for(var k = 0; k < questionData[i][j].length; k++) {
+        if(!Array.isArray(questionData[i][j][k])){
+          continue;
+        }
+        
+        var lmId = questionData[i][j][k].id;
+        statement.setInt(2, lmId);
+        statement.addBatch();
+      }
+    }
+  }
+  */
+  
+  statement.executeBatch();
+  statement.close();
 }

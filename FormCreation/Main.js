@@ -19,14 +19,13 @@ function onFormSubmit(e) {
   if(saveNewForm(con, form)){
     Logger.log('Form stored in the database %s', form.getId());
   }
-  // TODO store formId as metadata in destination sheet
+  
+  var questionIds = getSubQuestionIds(con, subjects[0]); // Lacks support for 2+ examensmal
+  saveNewFormQuestions(con, form.getId(), questionIds);
   con.close();
   
-//  var trigger = ScriptApp.newTrigger('onGeneratedFormSubmit').forForm(form).onFormSubmit().create();
-  // TODO: set up trigger for onFormSubmit via the service
-  // and implement the function that will run on trigger
-  // Add the form in database, 'enkat' table
-  // Add description to each PageBreakItem; provide link to document with info about examensmal and its larandemal (not yet available)
+  // TODO store formId as metadata in destination sheet? (not necessary since formUrl is accessible)
+  // Add description to each PageBreakItem; provide link to document with info about examensmal and its larandemal (document not available yet)
 }
 
 // Extract examensmal numbers from question items.

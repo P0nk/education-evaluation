@@ -1,10 +1,12 @@
 var newForm = {
   title: 'Uppfyllnad av lärandemål som ingenjör',
   desc: 'Ange de lärandemål som din kurs bidrar till',
-  kursTitle: 'Ange kurskod',
-  kursDesc: 'Till exempel "IV1350"',
-  nameTitle: 'Ange ditt namn',
-  nameDesc: 'För- och efternamn',
+  kursTitle: 'Kurskod',
+  kursDesc: 'Ange kurskod, till exempel "IV1350"',
+  kursPattern: '[A-Z]{2}[A-Z0-9]{4}',
+  kursPatternDesc: 'Must start with 2 letters and end with 4 letters/numbers',
+  nameTitle: 'Namn',
+  nameDesc: 'Ange ditt för- och efternamn',
   questionTitlePrefix: 'Examensmål ',
   questionPrefix: 'Nivå ',
   questionSeparator: ': '

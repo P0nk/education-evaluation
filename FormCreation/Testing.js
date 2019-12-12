@@ -36,3 +36,7 @@ function stringTest() {
   var substr = string.substring(0, index);
   Logger.log('%s substring to last index of 1: %s', string, substr);
 }
+
+function testValidation() {
+  var validation = FormApp.createTextValidation().setHelpText('Help text 123');
+}
