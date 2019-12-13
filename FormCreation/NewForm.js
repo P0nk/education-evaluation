@@ -25,7 +25,8 @@ function createFormSkeleton(form) {
   var pattern = newForm.kursPattern;
   var kursValidation = FormApp.createTextValidation()
       .requireTextMatchesPattern(newForm.kursPattern)
-      .setHelpText(newForm.kursPatternDesc);
+      .setHelpText(newForm.kursPatternDesc)
+      .build();
   itemKurs.setValidation(kursValidation);
   itemKurs.setTitle(newForm.kursTitle);
   itemKurs.setHelpText(newForm.kursDesc);
@@ -73,7 +74,7 @@ function fillForm(form, mainQuestions, subQuestions) {
 function getNewFileTitle() {
   var date = new Date();
   var curDayMonth = date.getDate() + '/' + (date.getMonth()+1) + '/' + date.getYear();
-  var minutes = date.getMinutes;
+  var minutes = date.getMinutes();
   if(minutes < 10) {
     minutes = '0' + minutes;
   }
