@@ -4,9 +4,16 @@ function load() {
   var programData = getEduProgramDataFromSheet(sheet);
   var sheetData = retrieveKurserForProgram(con, programData.eduProgramTitle, programData.eduProgramYear);
   writeSheetData(sheetData);
-  setBloomColors(SpreadsheetApp.getActiveSheet().getRange(3,2,21,12))  
+  setBloomColors(SpreadsheetApp.getActiveSheet().getRange(3,2,21,12));
+  /*
+  var kurser = loadKurser(con);
+  loadLarMal(con, 1, kurser);
+  loadLarMal(con, 2, kurser);
+  */
+  
   con.close();
 }
+
 
 function initialize(con) {
   var kurser = retrieveKursFromDb(con);  
@@ -50,8 +57,6 @@ function writeSheetData(sheetData){
 }
 
 function retrieveKurserForProgram(con, eduProgram, eduYear) {
-  //Logger.log(eduProgram);
-  //Logger.log(eduYear);
   var query = 
       "SELECT lm.examensmal, k.kurskod, CONCAT(lm.examensmal, '.', lm.bloom, '.', lm.nummer) AS larandemal " + 
       "FROM larandemal lm " + 
@@ -87,7 +92,6 @@ function retrieveKurserForProgram(con, eduProgram, eduYear) {
     var larandemal = rs.getString(3);
     malUppfyllnad.push({'examensmal':examensmal, 'kurs':kurskod, 'larandemal':larandemal});
   }
-  Logger.log(malUppfyllnad);
   
   return malUppfyllnad;
 }

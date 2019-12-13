@@ -3,9 +3,7 @@ function setBloomColors(range) {
     for(j=1; j<=range.getNumColumns(); j++){
       setCellBloomColor(range.getCell(i,j))
     }
-  
   }
-  
 }
 
 function setCellBloomColor(cell){
@@ -18,9 +16,6 @@ function setCellBloomColor(cell){
   var cellData = cell.getValue().toString();
   if(regexBloomLevel6.test(cellData)){
     cell.setBackground("#1954a6");
-  }
-  else if(regexBloomLevel6.test(cellData)){
-    cell.setBackground("#1e65c8");
   }
   else if(regexBloomLevel5.test(cellData)){
     cell.setBackground("#377ee1");
@@ -37,7 +32,4 @@ function setCellBloomColor(cell){
   else if(regexBloomLevel1.test(cellData)){
     cell.setBackground("#e9f1fc");
   }
-  
-  
-
 }
