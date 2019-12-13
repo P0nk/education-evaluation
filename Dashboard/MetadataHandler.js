@@ -28,7 +28,7 @@ function getDevDataSheet(key) {
   
   var metadata = sheet.getDeveloperMetadata();
   
-  for(var i = 0; metadata.length; i++) {
+  for(var i = 0; i < metadata.length; i++) {
     if(metadata[i].getKey() == key) {
       return metadata[i].getValue();
     }

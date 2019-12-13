@@ -9,22 +9,15 @@ var mdKey = {
   'programYear': 'eduProgramYear'
 };
 
+
 var amountExMal = 11;
-
-function concatTest() {
-  
-  for(var i = 0; i < 3; i++) {
-    var array = new Array(11);
-    for(var k = 0; k < array.length; k++) {
-      array[k] = '';
-    }
-    
-    
-    for(var j = 0; j < 5; j++) {
-      array[i] = array[i].concat(j);
-    }
-    
-    Logger.log(i + ' ' + array);
-  }
-}
-
+var amountKurser = 21;
+var LARANDEMAL_TABLE_CONTENT_STARTPOSITION_ROW = 3;
+var LARANDEMAL_TABLE_CONTENT_STARTPOSITION_COL= 2;
+//Bloom levels
+var BLOOM_1 = 'Fakta';
+var BLOOM_2 = 'Förståelse';
+var BLOOM_3 = 'Tillämpning';
+var BLOOM_4 = 'Analysera';
+var BLOOM_5 = 'Utvärdera';
+var BLOOM_6 = 'Skapa';
