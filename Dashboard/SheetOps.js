@@ -2,11 +2,7 @@ function onOpen() {
   var ui = SpreadsheetApp.getUi();
   // Or DocumentApp or FormApp.
   ui.createMenu('Dashboard')
-      .addItem('Load data', 'showAlert')
-      .addItem('Initialize sheet', 'initializeSheet')
-      .addItem('CalculateBloomLevels', 'calculateBloom')
-      .addItem('bloomTable', 'createBloomTable')
-      .addItem('bloomDiagram', 'createBloomDiagrams')
+      .addItem('Load data', 'showAlert').addItem('Initialize sheet', 'initializeSheet')
       .addToUi(); 
 }
 
@@ -42,10 +38,6 @@ function initializeSheet() {
   } else {
     // User clicked "No" or X in the title bar.
   }
-}
-
-function calculateBloom(){
- setBloomColors(SpreadsheetApp.getActiveSheet().getRange(placementData.row, placementData.col, 21, placementData.colEnd))
 }
 
 // Unused

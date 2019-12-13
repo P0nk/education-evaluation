@@ -1,4 +1,4 @@
-function establishDbConnection() { 
+function establishDbConnection() {
   var user = 'root';
   var schema = 'tidab_quality';
   var password = getPassword();
