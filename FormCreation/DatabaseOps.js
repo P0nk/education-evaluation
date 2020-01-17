@@ -1,45 +1,98 @@
+/**
+* Retrieve all programmal from the database
+* @param {JdbcConnection} con - active database connection
+* @param {String} programKod - program to retrieve programmal for
+* @return {ProgramMal[]} all programmal dictated by programKod
+*/
+function retrieveProgramMal(con, programKod) {
+  var query = 
+  'SELECT pmt.typ, pm.nummer, pm.beskrivning ' + 
+  'FROM programmal AS pm ' + 
+  'INNER JOIN programmaltyp AS pmt ' + 
+	'ON pm.typ = pmt.id ' + 
+  'INNER JOIN programprogrammal AS ppm ' + 
+	'ON pm.id = ppm.programmal ' + 
+  'INNER JOIN program AS p ' + 
+	'ON ppm.program = p.id ' + 
+  'WHERE p.programkod = ?' +
+  'ORDER BY pmt.id, pm.nummer';
+  var statement = con.prepareStatement(query);
+  statement.setString(1, programKod);
+  var rs = statement.executeQuery();
+  
+  var programMalList = [];
+  while(rs.next()) {
+    var typ = rs.getString(1);
+    var nummer = rs.getInt(2);
+    var beskrivning = rs.getString(3);
+    
+    var programMal = new ProgramMal(typ, nummer, beskrivning);
+    programMalList.push(programMal);
+    // programMalList.push({typ: typ, nummer: nummer, beskrivning: beskrivning});
+  }
+  
+  return programMalList;
+}
+
+/* Not valid anymore I think */
 // Returns a 3-dimensional array containing objects of type: {bloom:bloomLevel, number:bloomNumber, description:larandemalDescription}
 // 1st dim: examensmal
 // 2nd dim: bloom level
 // 3rd dim: larandemal
-function retrieveQuestionData(con, questions) {
+
+/**
+* Retrieve question data from the database.
+* @param {JdbcConnection} con - active Jdbc connection to the database
+* @param {ResponseMal} input - form input used to 
+* @return {LarandeMal[][]} all question data dictated by input
+*/
+function retrieveQuestionData(con, input) {
   var query = 
-    "SELECT bloom, nummer, beskrivning, id " + 
-    "FROM larandemal lmOuter " + 
-    "WHERE examensmal = ? " + 
-      "AND version IN (SELECT MAX(version) FROM larandemal lmInner WHERE lmOuter.id = lmInner.id) " + 
-    "ORDER BY bloom, nummer";
+  'SELECT lm.bloom, lm.nummer, lm.beskrivning, lm.id, lm.version ' + 
+  'FROM larandemal AS lm ' +
+  'INNER JOIN aktiveratlarandemal AS alm ' + 
+    'ON lm.id = alm.larandemal ' + 
+  'INNER JOIN programmal AS pm ' +
+	'ON lm.programmal = pm.id ' + 
+  'INNER JOIN programmaltyp AS pmt ' + 
+	'ON pm.typ = pmt.id ' + 
+  'WHERE pmt.typ = ? ' + 
+  'AND version IN (SELECT MAX(version) FROM larandemal lmInner WHERE lm.id = lmInner.id) ' + 
+  'AND pm.nummer = ? ' + 
+  'AND alm.aktiverat = TRUE ' +
+  'ORDER BY bloom, lm.nummer';
   var statement = con.prepareStatement(query);
   
+  var malTyp = input.word;
+  var malNummer = input.number;
+  statement.setString(1, malTyp);
+  statement.setInt(2, malNummer);
+  
+  var rs = statement.executeQuery();
+  
   var subQuestions = [];
-  for(var i = 0; i < questions.length; i++) {
-    subQuestions[i] = [];
-    var question = questions[i];
-    statement.setInt(1, question);
-    var rs = statement.executeQuery();
+  while(rs.next()) {
+    var bloom = rs.getInt(1);
+    var number = rs.getInt(2);
+    var description = rs.getString(3);
+    var id = rs.getInt(4);
+    var version = rs.getInt(5);
+    var dataTransferObj = new LarandeMal(id, bloom, number, version, description);
     
-    while(rs.next()) {
-      var bloom = rs.getInt(1);
-      var number = rs.getInt(2);
-      var description = rs.getString(3);
-      var id = rs.getInt(4);
-      var dataTransferObj = {bloom:bloom, number:number, description:description, id:id};
-      
-      if(!Array.isArray(subQuestions[i][bloom]) || !subQuestions[i][bloom].length) {
-        subQuestions[i][bloom] = [dataTransferObj];
-      } else {
-        subQuestions[i][bloom].push(dataTransferObj);
-      }
+    if(!Array.isArray(subQuestions[bloom]) || !subQuestions[bloom].length) {
+      subQuestions[bloom] = [dataTransferObj];
+    } else {
+      subQuestions[bloom].push(dataTransferObj);
     }
-    
-    rs.close();
-    statement.clearParameters();
   }
   
+  rs.close();
   statement.close();
   return subQuestions;
 }
 
+// Unused
+/** Uses old table
 function retrieveSubjectData (con, subjects) {
   var query = 
       'SELECT nummer, beskrivning ' + 
@@ -73,7 +126,14 @@ function retrieveSubjectData (con, subjects) {
   Logger.log(subjectData);
   return subjectData;
 }
+*/
 
+/**
+* Insert a new form in the database
+* @param {JdbcConnection} con - active database connection
+* @param {Form} form - form to insert
+* @return {Boolean} insert success
+*/
 function saveNewForm(con, form) {
   var formId = form.getId();
   var query = 
@@ -87,22 +147,36 @@ function saveNewForm(con, form) {
   return success;
 }
 
+/* Old
 function testGetSubQuestionIds() {
   var con = establishDbConnection();
   var examensmal = 1;
   var larandemal = getSubQuestionIds(con, examensmal);
   Logger.log(larandemal);
 }
+*/
 
-function getSubQuestionIds(con, mainQuestion) {
+/**
+* Retrieve larandemal ids for a given programmal
+* @param {JdbcConnection} con - active database connection
+* @param {ResponseMal} input - form input
+* @return {Integer[]} larandemal ids
+*/
+function getSubQuestionIds(con, input) {
   var query = 
-    "SELECT id " + 
-    "FROM larandemal lmOuter " + 
-    "WHERE examensmal = ? " + 
-      "AND version IN (SELECT MAX(version) FROM larandemal lmInner WHERE lmOuter.id = lmInner.id) " + 
-    "ORDER BY id";
+  'SELECT lm.id ' + 
+  'FROM larandemal lm ' + 
+  'INNER JOIN programmal AS pm ' + 
+	'ON lm.programmal = pm.id ' + 
+  'INNER JOIN programmaltyp AS pmt ' + 
+	'ON pm.typ = pmt.id ' + 
+  'WHERE pmt.typ = ? ' + 
+  'AND pm.nummer = ? ' +
+  'AND version IN (SELECT MAX(version) FROM larandemal lmInner WHERE lm.id = lmInner.id) ' + 
+  'ORDER BY lm.id';
   var statement = con.prepareStatement(query);
-  statement.setInt(1, mainQuestion);
+  statement.setString(1, input.word);
+  statement.setString(2, input.number);
   var rs = statement.executeQuery();
   
   var ids = [];
@@ -120,6 +194,12 @@ function getSubQuestionIds(con, mainQuestion) {
 // UNTESTED.
 // Can either parse questionData (which is error prone due to large 3d array),
 // or do an extra call to db to fetch only pure ids, making this function much simpler
+/**
+* Insert question to a form
+* @param {JdbcConnection} con - active database connection
+* @param {String} formId - form to add questions to
+* @param {Integer[]} questionIds - questions to add
+*/
 function saveNewFormQuestions(con, formId, questionIds) {
   var query = 
       'INSERT INTO enkatfraga(enkat, larandemal) ' + 
