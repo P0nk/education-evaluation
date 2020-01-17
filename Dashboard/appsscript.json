@@ -5,6 +5,11 @@
       "userSymbol": "Sheets",
       "serviceId": "sheets",
       "version": "v4"
+    }],
+    "libraries": [{
+      "userSymbol": "Common",
+      "libraryId": "1MZMgSCWDKF9SRKpKUsh8mBepK00bKEdrpvYNgYRu2a0ydKy64zSESlEr",
+      "version": "5"
     }]
   },
   "exceptionLogging": "STACKDRIVER",
