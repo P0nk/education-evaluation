@@ -73,7 +73,7 @@ function setCurrentProgram() {
   var ui = SpreadsheetApp.getUi();
   var response = ui.prompt('Ange programkod för det program som ska lista sina lärandemål', ui.ButtonSet.OK_CANCEL);
   
-  if(response.getSelectedButton().OK) {
+  if(response.getSelectedButton() === ui.Button.OK){
     var responseText = response.getResponseText();
     var mode = 1;
     Common.deleteAllDevData(mode, 'program');
@@ -94,79 +94,59 @@ function larandemalUpdate(){
   var progmalInfoObject = loadProgmalInfo(con);
   var devMetaDataString;
   var progmal;
+  var programmalNummer;
   var count = 0;
   
   for(var i in devMetaDataArray){
-    //SpreadsheetApp.getUi().alert(devMetaDataArray[i].getKey());
     if(devMetaDataArray[i].getKey() === 'savedLarandemal') {
       devMetaDataString = devMetaDataArray[i].getValue();
       count++;
     } else if(devMetaDataArray[i].getKey() === 'programmal') {
       progmal = devMetaDataArray[i].getValue();
       count++;
+    }else if(devMetaDataArray[i].getKey() === 'programmalNummer'){
+        programmalNummer = devMetaDataArray[i].getValue();
+        count++;
     }
     
-    // Only two specific entries of metadata are interesting, the rest are not used
-    if(count === 2){
+    // Only three specific entries of metadata are interesting, the rest are not used
+    if(count === 3){
       break;
     }
   }
-  //SpreadsheetApp.getUi().alert(devMetaDataString);
   var devMetaData = JSON.parse(devMetaDataString);
-  //SpreadsheetApp.getUi().alert(sheet.getDeveloperMetadata()[0].getValue());
-  //var devMetaData = JSON.parse(sheet.getDeveloperMetadata()[0]);
-  //var regex = RegExp('.\.[1-6]\..'); Fungerar ej varför???
-  //var regex = /.\.[1-6]\../;
-  var regex = /^[1-9][0-9]*\.[1-6]\.[1-9][0-9]*$/;
+  var regex = RegExp('^'+programmalNummer+'\\.[1-6]\\.[1-9][0-9]*$');
+  Logger.log(regex.toString());
   var valueColumn = 1; 
   var startRow = 1; 
   var endRow = sheet.getLastRow();
   var rowsWithLarandemal = parser(sheet, valueColumn, regex, startRow, endRow);
-  //SpreadsheetApp.getUi().alert(rowsWithLarandemal);
   var larandemalInformation = []; 
-  //SpreadsheetApp.getUi().alert(rowsWithLarandemal.length);
   for (var i = 0; i < rowsWithLarandemal.length; i++) {
-    //SpreadsheetApp.getUi().alert(extractLarandemalInformation(rowsWithLarandemal[i].toString()));
-    //SpreadsheetApp.getUi().alert(sheet.getRange(rowsWithLarandemal[i],1).getValue());
     // 1st column is the larandemal identifier
     var larandemalInfo  = extractLarandemalInformation(sheet.getRange(rowsWithLarandemal[i], 1).getValue());
     // 2nd column is the description text
     larandemalInfo.beskrivning = sheet.getRange(rowsWithLarandemal[i], 2).getValue();
     // 7th column is the checkbox for activity
     var aktivitet = sheet.getRange(rowsWithLarandemal[i], 7).getValue();
-    //SpreadsheetApp.getUi().alert(aktivitet);
-    //SpreadsheetApp.getUi().alert(aktivitet === true);
     if(aktivitet === true){
       larandemalInfo.aktiverat = 1;
     } else {
       larandemalInfo.aktiverat = 0; 
     }
-    //larandemalInfo.aktiverat = sheet.getRange(rowsWithLarandemal[i], 7).getValue();
     // 8th column is the checkbox for version
     larandemalInfo.newVersion = sheet.getRange(rowsWithLarandemal[i], 8).getValue();
     larandemalInformation.push(larandemalInfo);  
-    //SpreadsheetApp.getUi().alert(i);
   }
   var numgoalsBloomlevel = [];
-   //SpreadsheetApp.getUi().alert('bla');
-//  for(var i in antalBloomNivaer){
-//    numgoalsBloomlevel[i] = devMetaData[i].length;  
-//  }
   for(var i in devMetaData){
-    //SpreadsheetApp.getUi().alert(i);
     numgoalsBloomlevel[i] = devMetaData[i].length;  
   }
   var newLarandemalToAdd = [];
   var larandemalToBeUpdated = [];
   
   for(var i in larandemalInformation){
-    //var a = larandemalInformation[i].description;
-    //var b = devMetaData[larandemalInformation[i].bloomlevel-1][larandemalInformation[i].number-1].description;
-    //SpreadsheetApp.getUi().alert(a);
-    //SpreadsheetApp.getUi().alert(b);
-    //SpreadsheetApp.getUi().alert(a !== b);
     if((checkIfNummerNotInMetadata(larandemalInformation[i].nummer, devMetaData[larandemalInformation[i].bloomNiva])) || (larandemalInformation[i].newVersion === true)){
-      //SpreadsheetApp.getUi().alert("New larandemal");
       var programmal = progmal;
       var bloomNiva = larandemalInformation[i].bloomNiva; 
       var nummer = larandemalInformation[i].nummer;
@@ -175,7 +155,6 @@ function larandemalUpdate(){
       var newLarandemal = new NewLarandeMal(programmal, bloomNiva, nummer, beskrivning, aktiverat);
       
       if(larandemalInformation[i].newVersion === true){
-        //newLarandemal.version = getLarandemalInMetadataBloomArray(larandemalInformation[i].nummer, devMetaData[larandemalInformation[i].bloomNiva]).version + 1;
         var oldLarandemal =  getLarandemalInMetadataBloomArray(larandemalInformation[i].nummer, devMetaData[larandemalInformation[i].bloomNiva]);
         if(oldLarandemal === null){
            newLarandemal.version = 1; 
@@ -183,8 +162,6 @@ function larandemalUpdate(){
         else{
           newLarandemal.version = oldLarandemal.version + 1; 
         }
-
-        //devMetaData[larandemalInformation[i].bloomlevel-1][larandemalInformation[i].number-1].version +1;
       } else {
         newLarandemal.version = 1; 
       }
@@ -192,31 +169,16 @@ function larandemalUpdate(){
       newLarandemalToAdd.push(newLarandemal);
       //Need to add new larandemal
     } else {
-      //var updatedLarandemal = {};
       var count = 0;
-      //updatedLarandemal.beskrivning = larandemalInformation[i].beskrivning;
-      //var updatedBeskrivning = larandemalInformation[i].beskrivning;
       var larandemalMetadata= getLarandemalInMetadataBloomArray(larandemalInformation[i].nummer,devMetaData[larandemalInformation[i].bloomNiva]);
       if(larandemalInformation[i].beskrivning !== larandemalMetadata.beskrivning){
-         //SpreadsheetApp.getUi().alert("New description");
         //Need to change description 
-        //var id = devMetaData[larandemalInformation[i].bloomlevel-1][larandemalInformation[i].number-1].id;
-        //updatedLarandemal.description = larandemalInformation[i].description;
         count++;
       }
-      //updatedLarandemal.aktiverat = larandemalInformation[i].aktiverat;
-      //var updatedAktiverat = larandemalInformation[i].aktiverat;
       if(larandemalInformation[i].aktiverat !== larandemalMetadata.aktiverat) {
-        
-        //SpreadsheetApp.getUi().alert("New aktiverat");
-        //SpreadsheetApp.getUi().alert(larandemalInformation[i].aktiverat);
-        //SpreadsheetApp.getUi().alert(devMetaData[larandemalInformation[i].bloomlevel-1][larandemalInformation[i].number-1].activated);
         count++;
       }
-      //updatedLarandemal.id = larandemalMetadata.id;
-      //var updatedId = larandemalMetadata.id;
       if(count > 0) {
-        //SpreadsheetApp.getUi().alert(count);
         var updatedBeskrivning = larandemalInformation[i].beskrivning;
         var updatedAktiverat = larandemalInformation[i].aktiverat;
         var updatedId = larandemalMetadata.id;
@@ -255,18 +217,6 @@ function larandemalUpdate(){
   }
   
   loadSingleLarandemalLista(parseInt(progmal));
-  
-  
-  
-  //SpreadsheetApp.getUi().alert(numgoalsBloomlevel);
-  
-//  var testString = "";
-//  SpreadsheetApp.getUi().alert(larandemalInformation.length);
-//  for(var i=0; i<larandemalInformation.length; i++){
-//    testString+="Examensmål: "+larandemalInformation[i].examensmal+" bloomnivå: "+larandemalInformation[i].bloomniva+" nummer: "+larandemalInformation[i].nummer+"\n";
-//  
-//  }
-//  SpreadsheetApp.getUi().alert(testString);
 }
 
 /** 
@@ -370,22 +320,40 @@ function onEdit(e) {
       checkboxRange.insertCheckboxes();  
     }
     var newValue = range.getValue();
-    var regex = new RegExp('\^'+newValue+'\$');
-    var valueColumn = 1;
-    var startRow = 1; 
-    var endRow = sheet.getLastRow();
-    var rowsWithSameValue = parser(sheet, valueColumn, regex, startRow, endRow);
-    var count = 0; 
-    for(i in rowsWithSameValue){
-      if(rowsWithSameValue[i] !== rowNumber){
-        range.setBackground('red');
-        range.setValue('Ett lärandemål med sifferkombinationen '+ newValue +' existerar redan. Vänligen skriv in en annan sifferkombination.');
-        count++;
-        break; 
+    var regexLarandemalSiffror = /^[1-9][0-9]*\.[1-6]\.[1-9][0-9]*$/;
+    if(regexLarandemalSiffror.test(newValue)){
+      var programmalNummer = Common.getDevDataSheet(sheet, 'programmalNummer');
+      var regexCorrectProgmmalNummer = RegExp('^'+programmalNummer+'\\.[1-6]\\.[1-9][0-9]*$');
+      Logger.log(regexCorrectProgmmalNummer.toString());
+      if( false === regexCorrectProgmmalNummer.test(newValue)){
+        range.setBackground('orange');
+        range.setValue('Lärandemålet med sifferkombinationen '+ newValue +' har fel programmålnummer. Vänligen skriv in korrekt programmålnummer ('+programmalNummer +').');
       }
+      else{
+        var regex = new RegExp('\^'+newValue+'\$');
+        var valueColumn = 1;
+        var startRow = 1; 
+        var endRow = sheet.getLastRow();
+        var rowsWithSameValue = parser(sheet, valueColumn, regex, startRow, endRow);
+        var count = 0; 
+        for(i in rowsWithSameValue){
+          if(rowsWithSameValue[i] !== rowNumber){
+            range.setBackground('red');
+            range.setValue('Ett lärandemål med sifferkombinationen '+ newValue +' existerar redan. Vänligen skriv in en annan sifferkombination.');
+            count++;
+            break; 
+          }
+        }
+        if(count === 0){
+          range.setBackground('white');
+        }
+      }
+    
     }
-    if(count === 0){
-      range.setBackground('white');
+    else{
+      if(!(range.getBackground() === '#ffffff')){
+        range.setBackground('white');
+      }
     }
  }
   
