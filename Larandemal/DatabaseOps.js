@@ -1,5 +1,5 @@
 /** 
-*Load all larandemal from the database
+*Load all larandemal from the database 
 * @param {JdbcConnection} con - active JDBC connection
 * @returns {LarandeMal []} larandemalArray - array of LarandeMal
 */
