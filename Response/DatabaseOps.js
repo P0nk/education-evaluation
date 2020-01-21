@@ -7,9 +7,14 @@
 * 'responseId' value is equal to the generated id in the database from the insert
 */
 function insertResponses(con, formId, responses) {
+  // previously used INSERT IGNORE INTO, but it caused problems.
+  // There's no known order in the generated keys if some batch failed
+  // this led to the system always deleting rows starting from the first row
   var query = 
-    'INSERT IGNORE INTO respons(enkat, respondent_namn, kurskod, inskickat) ' + 
+    'INSERT INTO respons(enkat, respondent_namn, kurskod, inskickat) ' + 
     'VALUES((SELECT id FROM enkat WHERE form_id = ?), ?, ?, ?)';
+  con.setAutoCommit(false);
+
   // Any int is able to substitute Statement.RETURN_GENERATED_KEYS on 2nd parameter
   var statement = con.prepareStatement(query, 1); 
   statement.setString(1, formId);
@@ -29,6 +34,7 @@ function insertResponses(con, formId, responses) {
   }
   
   statement.executeBatch();
+  con.commit();
   var responseIds = statement.getGeneratedKeys();
   var i = 0;
   while(responseIds.next()){
@@ -38,6 +44,7 @@ function insertResponses(con, formId, responses) {
   }
   //Logger.log('Data objects: %s', responses);
   statement.close();
+  con.setAutoCommit(true);
   return responses;
 }
 
