@@ -14,7 +14,7 @@ function establishDbConnection() {
   };
   
   var user = 'root';
-  var schema = 'tidab_quality';
+  var schema = getPropertyValue('DB_SCHEMA');
   var password = getPropertyValue('DB_PASSWORD');
   var subname = getPropertyValue('DB_SUBNAME'); // Subname is called 'Instance connection name' in console overview
   var dbUrl = 'jdbc:google:mysql://' + subname + '/' + schema;
