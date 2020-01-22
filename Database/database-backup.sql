@@ -355,7 +355,7 @@ CREATE TABLE `programmal` (
   PRIMARY KEY (`id`),
   KEY `programmal.typ_idx` (`typ`),
   CONSTRAINT `programmal.typ` FOREIGN KEY (`typ`) REFERENCES `programmaltyp` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -364,7 +364,7 @@ CREATE TABLE `programmal` (
 
 LOCK TABLES `programmal` WRITE;
 /*!40000 ALTER TABLE `programmal` DISABLE KEYS */;
-INSERT INTO `programmal` VALUES (1,1,1,'Visa kunskap om det valda teknikområdets vetenskapliga grund och dess beprövade erfarenhet samt kännedom om aktuellt forsknings- och utvecklingsarbete.'),(2,1,2,'Visa brett kunnande inom det valda teknikområdet och relevant kunskap i matematik och naturvetenskap.'),(3,1,3,'Visa förmåga att med helhetssyn självständigt och kreativt identifiera, formulera och hantera frågeställningar och analysera och utvärdera olika tekniska lösningar.'),(4,1,4,'Visa förmåga att planera och med adekvata metoder genomföra uppgifter inom givna ramar.'),(5,1,5,'Visa förmåga att kritiskt och systematiskt använda kunskap samt att modellera, simulera, förutsäga och utvärdera skeenden med utgångspunkt i relevant information.'),(6,1,6,'Visa förmåga att utforma och hantera produkter, processer och system med hänsyn till människors förutsättningar och behov och samhällets mål för ekonomiskt, socialt och ekologiskt hållbar utveckling.'),(7,1,7,'Visa förmåga till lagarbete och samverkan i grupper med olika sammansättning.'),(8,1,8,'Visa förmåga att muntligt och skriftligt redogöra för och diskutera information, problem och lösningar i dialog med olika grupper.'),(9,1,9,'Visa förmåga att göra bedömningar med hänsyn till relevanta vetenskapliga, samhälleliga och etiska aspekter.'),(10,1,10,'Visa insikt i teknikens möjligheter och begränsningar, dess roll i samhället och människors ansvar för dess nyttjande, inbegripet sociala och ekonomiska aspekter samt miljö- och arbetsmiljöaspekter.'),(11,1,11,'Visa förmåga att identifiera sitt behov av ytterligare kunskap och att fortlöpande utveckla sin kompetens.'),(16,2,1,'Visa förmåga ut utföra tester'),(17,2,2,'Arbeta i projekt'),(18,2,3,'Temamål3'),(19,2,4,'Temamål4'),(20,2,5,'Speciellt temamål för el-data'),(21,2,6,'Temamål6'),(22,2,7,'Temamål7'),(23,2,8,'Temamål8'),(24,2,9,'Temamål9'),(25,2,10,'Temamål10');
+INSERT INTO `programmal` VALUES (1,1,1,'Visa kunskap om det valda teknikområdets vetenskapliga grund och dess beprövade erfarenhet samt kännedom om aktuellt forsknings- och utvecklingsarbete.'),(2,1,2,'Visa brett kunnande inom det valda teknikområdet och relevant kunskap i matematik och naturvetenskap.'),(3,1,3,'Visa förmåga att med helhetssyn självständigt och kreativt identifiera, formulera och hantera frågeställningar och analysera och utvärdera olika tekniska lösningar.'),(4,1,4,'Visa förmåga att planera och med adekvata metoder genomföra uppgifter inom givna ramar.'),(5,1,5,'Visa förmåga att kritiskt och systematiskt använda kunskap samt att modellera, simulera, förutsäga och utvärdera skeenden med utgångspunkt i relevant information.'),(6,1,6,'Visa förmåga att utforma och hantera produkter, processer och system med hänsyn till människors förutsättningar och behov och samhällets mål för ekonomiskt, socialt och ekologiskt hållbar utveckling.'),(7,1,7,'Visa förmåga till lagarbete och samverkan i grupper med olika sammansättning.'),(8,1,8,'Visa förmåga att muntligt och skriftligt redogöra för och diskutera information, problem och lösningar i dialog med olika grupper.'),(9,1,9,'Visa förmåga att göra bedömningar med hänsyn till relevanta vetenskapliga, samhälleliga och etiska aspekter.'),(10,1,10,'Visa insikt i teknikens möjligheter och begränsningar, dess roll i samhället och människors ansvar för dess nyttjande, inbegripet sociala och ekonomiska aspekter samt miljö- och arbetsmiljöaspekter.'),(11,1,11,'Visa förmåga att identifiera sitt behov av ytterligare kunskap och att fortlöpande utveckla sin kompetens.'),(16,2,1,'JML - Jämställdhetslagen, jämlikhet'),(17,2,2,'Software engineering'),(18,2,3,'Projektmetoder'),(19,2,4,'Programmering'),(20,2,5,'Entreprenörsskap'),(21,2,6,'???'),(22,2,7,'???'),(23,2,8,'???'),(24,2,9,'???'),(25,2,10,'???'),(26,2,11,'Speciellt temamål för el-data'),(27,2,12,'???'),(28,2,13,'???'),(29,2,14,'???'),(30,2,15,'???');
 /*!40000 ALTER TABLE `programmal` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -416,7 +416,7 @@ CREATE TABLE `programprogrammal` (
 
 LOCK TABLES `programprogrammal` WRITE;
 /*!40000 ALTER TABLE `programprogrammal` DISABLE KEYS */;
-INSERT INTO `programprogrammal` VALUES (1,1),(3,1),(1,2),(3,2),(1,3),(3,3),(1,4),(3,4),(1,5),(3,5),(1,6),(3,6),(1,7),(3,7),(1,8),(3,8),(1,9),(3,9),(1,10),(3,10),(1,11),(3,11),(1,16),(1,18),(1,19),(3,20),(1,21),(1,22),(1,23);
+INSERT INTO `programprogrammal` VALUES (1,1),(3,1),(1,2),(3,2),(1,3),(3,3),(1,4),(3,4),(1,5),(3,5),(1,6),(3,6),(1,7),(3,7),(1,8),(3,8),(1,9),(3,9),(1,10),(3,10),(1,11),(3,11),(1,16),(1,17),(1,18),(1,19),(1,20),(3,20),(1,21),(1,22),(1,23),(1,24),(1,25);
 /*!40000 ALTER TABLE `programprogrammal` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -917,4 +917,4 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-01-21 14:21:44
+-- Dump completed on 2020-01-22 11:11:52
