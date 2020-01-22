@@ -416,7 +416,7 @@ CREATE TABLE `programprogrammal` (
 
 LOCK TABLES `programprogrammal` WRITE;
 /*!40000 ALTER TABLE `programprogrammal` DISABLE KEYS */;
-INSERT INTO `programprogrammal` VALUES (1,1),(3,1),(1,2),(3,2),(1,3),(3,3),(1,4),(3,4),(1,5),(3,5),(1,6),(3,6),(1,7),(3,7),(1,8),(3,8),(1,9),(3,9),(1,10),(3,10),(1,11),(3,11),(1,16),(1,17),(1,18),(1,19),(1,20),(3,20),(1,21),(1,22),(1,23),(1,24),(1,25);
+INSERT INTO `programprogrammal` VALUES (1,1),(3,1),(1,2),(3,2),(1,3),(3,3),(1,4),(3,4),(1,5),(3,5),(1,6),(3,6),(1,7),(3,7),(1,8),(3,8),(1,9),(3,9),(1,10),(3,10),(1,11),(3,11),(1,16),(1,17),(1,18),(1,19),(1,20),(1,21),(1,22),(1,23),(1,24),(1,25),(3,26);
 /*!40000 ALTER TABLE `programprogrammal` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -917,4 +917,4 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-01-22 11:11:52
+-- Dump completed on 2020-01-22 11:35:47
