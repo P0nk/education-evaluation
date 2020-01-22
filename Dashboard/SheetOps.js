@@ -311,19 +311,6 @@ function writeSheetData(sheet, sheetData) {
   range.setValues(programData);
 }
 
-function testUserDate() {
-  var sheet = SpreadsheetApp.getActiveSheet();
-  var date = getUserRequestedDate(sheet);
-  if(!(date instanceof Date)) {
-    SpreadsheetApp.getUi().alert('Fel format på datum');
-    return;j
-  }
-  var timezone = Common.TIMEZONE;
-  var format = Common.TIMESTAMP_FORMAT;
-  date = Utilities.formatDate(date, timezone, format);
-  SpreadsheetApp.getUi().alert(date)
-}
-
 /**
 * Get date from direct user input into the sheet
 * @param {Sheet} sheet - sheet to get date from
