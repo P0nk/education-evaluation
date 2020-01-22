@@ -49,8 +49,8 @@ function createFormSkeleton(form) {
 // questionData is only partially filled (based on data from database, 'larandemal' table)
 /**
 * @param {Form} form - form to fill
-* @param {} input
-* @param {} questionData
+* @param {ResponseMal} input - mal data taken from form response
+* @param {LarandeMal[][]} questionData
 * @return {Form} form filled with questions
 */
 function fillForm(form, input, questionData) {
@@ -75,8 +75,9 @@ function fillForm(form, input, questionData) {
     for(var k = 0; k < questionData[j].length; k++) {
       var description = questionData[j][k].description;
       var version = questionData[j][k].version;
-      var bloomLevel = k + 1;
-      var choice = Utilities.formatString('%s: %s [v%s]', bloomLevel, description, version);
+      //var bloomLevel = k + 1; // should apply real bloom level from data instead of array index
+      var number = questionData[j][k].number;
+      var choice = Utilities.formatString('%s: %s [v%s]', number, description, version);
       choices.push(item.createChoice(choice));
     }
     
