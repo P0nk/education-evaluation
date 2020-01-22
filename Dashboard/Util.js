@@ -29,3 +29,24 @@ function getCellValue(sheet, row, col) {
   var value = sheet.getRange(row, col).getValue();
   return value;
 }
+
+/**
+* Generate the smallest possible timestamp that all other normal timestamps should be greated than
+* @return {String} the smallest timestamp
+*/
+function getSmallestTimestamp() {
+  var timestamp = '00-00-00 00:00:00';
+  return timestamp;
+}
+
+/**
+* Convert a Date object to a MYSQL timestamp string
+* @param {Date} date - the date to convert
+* @return {String} a string following the MySQL timestamp format
+*/
+function dateToTimestamp(date) {
+  var timezone = Common.TIMEZONE;
+  var format = Common.TIMESTAMP_FORMAT;
+  var timestamp = Utilities.formatDate(date, timezone, format);
+  return timestamp;
+}

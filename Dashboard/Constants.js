@@ -4,6 +4,7 @@
 var loc = {
   program: {row: 1, col: 1},
   termin: {row: 2, col: 1},
+  date: {row: 3, col: 1},
   kurs: {row: 6, col: 1, colEnd: 2, colKursKod: 1, colKursNamn: 2},
   malText: {row: 1, rowEnd: 3, col: 3},
   malNummer: {row: 4, rowEnd: 5, col: 3},

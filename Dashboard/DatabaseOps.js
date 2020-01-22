@@ -3,9 +3,10 @@
 * @param {JdbcConnection} con - an active JDBC connection to the database
 * @param {string} programCode - the program for which to get data
 * @param {string} programStart - the arskull for which to get data
+* @param {String} timestamp - a timestamp to filter data with. Will only fetch responses sent in after this timestamp.
 * @return {MalUppfyllnad[]} - all data about goal fulfillment with the specified program and arskull
 */
-function retrieveDataForProgram(con, programCode, programStart) {
+function retrieveDataForProgram(con, programCode, programStart, timestamp) {
   var query = 
   'SELECT id, nummer, kurskod, larandemal ' + 
   'FROM (SELECT pmt.id, pm.nummer, k.kurskod, CONCAT(pm.nummer, ".", lm.bloom, ".", lm.nummer) AS larandemal ' +
@@ -29,13 +30,14 @@ function retrieveDataForProgram(con, programCode, programStart) {
     'WHERE ak.program = ? ' + 
     'AND ak.terminstart = ? ' + 
     'AND es.svar = TRUE ' + 
-    // 'AND rs.inskickat > "2020-01-01 01:00:00" ' + to be included in some way, but not hard coded like this
+    'AND rs.inskickat > ? ' + //to be included in some way, but not hard coded like this
     'AND lm.version IN (SELECT MAX(version) FROM larandemal lmInner WHERE lm.id = lmInner.id)) AS with_dups ' + 
   'GROUP BY id, nummer, kurskod, larandemal ' +
   'ORDER BY id, nummer, kurskod, larandemal';
   var statement = con.prepareStatement(query);
   statement.setString(1, programCode);
   statement.setString(2, programStart);
+  statement.setString(3, timestamp);
   var rs = statement.executeQuery();
   
   var malUppfyllnadList = [];

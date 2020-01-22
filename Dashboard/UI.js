@@ -15,6 +15,7 @@ function createMenu() {
       .addItem(menu.subTitleLoad, 'dialogLoadData')
       .addItem(menu.subTitleInit, 'dialogInitializeSheet')
       //.addItem('Clear', 'warningClear')
+      .addItem('Test user date', 'testUserDate')
       .addSubMenu(ui.createMenu('Developer')
         //.addItem('activate selected larandemal', 'activateLarandemal')
         //.addItem('deactivate selected larandemal', 'deactivateLarandemal')
