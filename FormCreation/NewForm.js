@@ -104,14 +104,22 @@ function generateFormFileTitle() {
   return title;
 }
 
-// Sets and renames
+/**
+* Set destination sheet with a for a form. The sheet is predetermined based on file name. Creates a new tab in the sheet where responses end up on form submissions.
+* @param {Form} form - the form to set destination sheet for
+*/
 function setDestinationSheet(form) {
-  form.setDestination(FormApp.DestinationType.SPREADSHEET, drive.formDestinationSpreadsheet);
+  var destinationFileId = getDestinationSpreadsheetId();
+  if(destinationFileId == null) {
+    return;
+  }
+  
+  form.setDestination(FormApp.DestinationType.SPREADSHEET, destinationFileId);
   var formFileName = DriveApp.getFileById(form.getId()).getName();
   var formUrl = trimUrl(form.getEditUrl()); 
   Logger.log('Form url: %s', formUrl);
   
-  var destinationSpreadsheet = SpreadsheetApp.openById(drive.formDestinationSpreadsheet);
+  var destinationSpreadsheet = SpreadsheetApp.openById(destinationFileId);
   destinationSpreadsheet.getSheets().forEach(function(sheet){
     var sheetUrl = sheet.getFormUrl();
     //Logger.log('Sheet url: %s', sheetUrl);
@@ -124,12 +132,29 @@ function setDestinationSheet(form) {
       sheet.setName(formFileName);
       // Loose protecion of column titles
       sheet.getRange('1:1').protect().setWarningOnly(true);
-      Logger.log('URLs are equal');
+      Logger.log('Headings are protected');
     }
   });
 }
 
+function testGetDestSS() {
+  var fileId = getDestinationSpreadsheetId();
+  Logger.log('Destination file id: %s', fileId);
+}
 
+/**
+* Get id of spreadsheet file where all form responses get stored
+* @return {Spreadsheet} form response destination spreadsheet, or null if no file was found.
+*/
+function getDestinationSpreadsheetId() {
+  var files = DriveApp.getFilesByName(drive.formDestinationSpreadsheetName);
+  if(files.hasNext()) {
+    var destFile = files.next();
+    return destFile.getId();
+  } else {
+    return null;
+  }
+}
 
 /* Previously used when the idea was to copy forms and set their onFormSubmit trigger by another project, which didn't work
 function onGeneratedFormSubmit(e) {

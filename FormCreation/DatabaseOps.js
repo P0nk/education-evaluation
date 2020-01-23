@@ -57,7 +57,10 @@ function retrieveQuestionData(con, input) {
   'INNER JOIN programmaltyp AS pmt ' + 
 	'ON pm.typ = pmt.id ' + 
   'WHERE pmt.typ = ? ' + 
-  'AND version IN (SELECT MAX(version) FROM larandemal lmInner WHERE lm.id = lmInner.id) ' + 
+  'AND version IN ' + 
+     '(SELECT MAX(version) FROM larandemal lmInner ' + // Filter out old versions
+     'WHERE lm.bloom = lmInner.bloom ' +
+     'AND lm.nummer = lmInner.nummer) ' +
   'AND pm.nummer = ? ' + 
   'AND alm.aktiverat = TRUE ' +
   'ORDER BY bloom, lm.nummer';
@@ -90,43 +93,6 @@ function retrieveQuestionData(con, input) {
   statement.close();
   return subQuestions;
 }
-
-// Unused
-/** Uses old table
-function retrieveSubjectData (con, subjects) {
-  var query = 
-      'SELECT nummer, beskrivning ' + 
-      'FROM examensmal ' + 
-      'WHERE nummer = ?';
-  var statement = con.prepareStatement(query);
-  
-  var subjectData = [];
-  for(var i = 0; i < subjects.length; i++) {
-    if(typeof (subjects[i]) != 'number') {
-      Logger.log('%s is not a number. Continuing...', subjects[i]);
-      Logger.log(typeof (subjects[i]));
-      continue;
-    }
-    
-    statement.setInt(1, subjects[i]);
-    var rs = statement.executeQuery();
-    
-    if(rs.next()) {
-      var subjectNumber = rs.getInt(1);
-      var subjectDesc = rs.getString(2);
-      subjectData[i] = {'number':subjectNumber, 'desc':subjectDesc};
-      Logger.log(subjectData[i]);
-    }
-    
-    rs.close();
-    statement.clearParameters();
-  }
-  
-  statement.close();
-  Logger.log(subjectData);
-  return subjectData;
-}
-*/
 
 /**
 * Insert a new form in the database
@@ -241,3 +207,40 @@ function saveNewFormQuestions(con, formId, questionIds) {
   statement.executeBatch();
   statement.close();
 }
+
+// Unused
+/** Uses old table
+function retrieveSubjectData (con, subjects) {
+  var query = 
+      'SELECT nummer, beskrivning ' + 
+      'FROM examensmal ' + 
+      'WHERE nummer = ?';
+  var statement = con.prepareStatement(query);
+  
+  var subjectData = [];
+  for(var i = 0; i < subjects.length; i++) {
+    if(typeof (subjects[i]) != 'number') {
+      Logger.log('%s is not a number. Continuing...', subjects[i]);
+      Logger.log(typeof (subjects[i]));
+      continue;
+    }
+    
+    statement.setInt(1, subjects[i]);
+    var rs = statement.executeQuery();
+    
+    if(rs.next()) {
+      var subjectNumber = rs.getInt(1);
+      var subjectDesc = rs.getString(2);
+      subjectData[i] = {'number':subjectNumber, 'desc':subjectDesc};
+      Logger.log(subjectData[i]);
+    }
+    
+    rs.close();
+    statement.clearParameters();
+  }
+  
+  statement.close();
+  Logger.log(subjectData);
+  return subjectData;
+}
+*/
