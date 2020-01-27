@@ -23,7 +23,8 @@ Man kan öppna GAS-projekt direkt via Apps Script dashboard: https://script.goog
 Alternativt kan man öppna filen som skriptet är kopplat till, och sedan via menyn klicka Tools -> Script editor.
 
 ## Arkitektur
-Systemet består av fem stycken GAS-projekt, och en databas i Google Cloud SQL. GAS-projekten kan ses som moduler som interagerar med databasen helt separerade från varandra.
+Systemet består av fem stycken GAS-projekt, och en databas i Google Cloud SQL. GAS-projekten kan ses som moduler som interagerar med databasen via ett bibliotek, men helt separerade från varandra.
+![alt text](https://github.com/P0nk/education-evaluation/blob/master/images/Systemarkitektur.png "Architecture")
 
 ## Language / Språk
 The Apps Script code is a blend of English and Swedish. Many variabel and function names include swedish terms. The database is entirely in Swedish. The documentation is in Swedish.
