@@ -1,17 +1,26 @@
-// 1. Copy template 
-// 2. Move to correct folder in Drive
+/**
+* Create an empty form in a predetermined folder
+* @return {Form} created form
+*/
 function createNewForm() {
-  var form = FormApp.create(getNewFileTitle());
-  moveFile(form.getId(), drive.generatedFormFolderId);
+  var formTitle = generateFormFileTitle();
+  var form = FormApp.create(formTitle);
+  var folder = DriveApp.getFoldersByName(drive.generatedFormFolderName).next();
+  var folderId = folder.getId();
+  moveFileToFolder(form.getId(), folderId);
   // Remains from when a template was used
   //var templateFile = DriveApp.getFileById(drive.templateFormId);
-  //var templateCopy = templateFile.makeCopy().setName(getNewFileTitle()).getId();
+  //var templateCopy = templateFile.makeCopy().setName(generateFormFileTitle()).getId();
   // moveFile(templateCopy, drive.generatedFormFolderId); // Not necessary if template file is in same folder
   setDestinationSheet(form);
   return form;
 }
 
-// Create the basic structure of the form. This includes title, description, 'kurs' question, 'name' question
+/**
+* Add basic structure to a form. This includes title, description, 'kurs' question, 'name' question
+* @param {Form} form - the form to add structure to
+* @return {Form} form with structure added to it
+*/
 function createFormSkeleton(form) {
   form.setTitle(newForm.title);
   form.setDescription(newForm.desc);
@@ -37,41 +46,52 @@ function createFormSkeleton(form) {
 
 
 // Fills a form with questions
-// subQuestions is only partially filled (based on data from database, 'larandemal' table)
-function fillForm(form, mainQuestions, subQuestions) {
-  for(var i = 0; i < mainQuestions.length; i++) {
-    if(!Array.isArray(subQuestions[i]) || !subQuestions[i].length){
-       continue;
+// questionData is only partially filled (based on data from database, 'larandemal' table)
+/**
+* @param {Form} form - form to fill
+* @param {ResponseMal} input - mal data taken from form response
+* @param {LarandeMal[][]} questionData
+* @return {Form} form filled with questions
+*/
+function fillForm(form, input, questionData) {
+  if(!Array.isArray(questionData) || questionData.length == 0){
+    return;
+  }
+  
+  var title = Utilities.formatString('%s %s', input.word, input.number);
+  var description = input.text;
+  form.addPageBreakItem().setTitle(title).setHelpText(description);
+  
+  for(var j = 0; j < questionData.length; j++) {
+    if(!Array.isArray(questionData[j]) || !questionData[j]) {
+      continue;
     }
-       
-    var title = newForm.questionTitlePrefix + mainQuestions[i].number;
-    var description = mainQuestions[i].desc;
-    form.addPageBreakItem().setTitle(title).setHelpText(description);
     
-    for(var j = 0; j < subQuestions[i].length; j++) {
-      if(!Array.isArray(subQuestions[i][j]) || !subQuestions[i][j]) {
-        continue;
-      }
-      
-      var item = form.addCheckboxItem();
-      var itemTitle = newForm.questionPrefix + j + newForm.questionSeparator + getBloomTitle(j);
-      item.setTitle(itemTitle);
-      
-      var choices = [];
-      for(var k = 0; k < subQuestions[i][j].length; k++) {
-        var description = subQuestions[i][j][k].description;
-        var choice = (k+1) + ': ' + description;
-        choices.push(item.createChoice(choice));
-      }
-      
-      item.setChoices(choices);
+    var item = form.addCheckboxItem();
+    var itemTitle = newForm.questionPrefix + j + newForm.questionSeparator + getBloomTitle(j);
+    item.setTitle(itemTitle);
+    
+    var choices = [];
+    for(var k = 0; k < questionData[j].length; k++) {
+      var description = questionData[j][k].description;
+      var version = questionData[j][k].version;
+      //var bloomLevel = k + 1; // should apply real bloom level from data instead of array index
+      var number = questionData[j][k].number;
+      var choice = Utilities.formatString('%s: %s [v%s]', number, description, version);
+      choices.push(item.createChoice(choice));
     }
+    
+    item.setChoices(choices);
   }
   
   return form;
 }
 
-function getNewFileTitle() {
+/**
+* Generate a form file title which includes current date and time.
+* @return {String} - the generated title
+*/
+function generateFormFileTitle() {
   var date = new Date();
   var curDayMonth = date.getDate() + '/' + (date.getMonth()+1) + '/' + date.getYear();
   var minutes = date.getMinutes();
@@ -84,17 +104,25 @@ function getNewFileTitle() {
   return title;
 }
 
-// Sets and renames
+/**
+* Set destination sheet with a for a form. The sheet is predetermined based on file name. Creates a new tab in the sheet where responses end up on form submissions.
+* @param {Form} form - the form to set destination sheet for
+*/
 function setDestinationSheet(form) {
-  form.setDestination(FormApp.DestinationType.SPREADSHEET, drive.formDestinationSpreadsheet);
+  var destinationFileId = getDestinationSpreadsheetId();
+  if(destinationFileId == null) {
+    return;
+  }
+  
+  form.setDestination(FormApp.DestinationType.SPREADSHEET, destinationFileId);
   var formFileName = DriveApp.getFileById(form.getId()).getName();
   var formUrl = trimUrl(form.getEditUrl()); 
   Logger.log('Form url: %s', formUrl);
   
-  var destinationSpreadsheet = SpreadsheetApp.openById(drive.formDestinationSpreadsheet);
+  var destinationSpreadsheet = SpreadsheetApp.openById(destinationFileId);
   destinationSpreadsheet.getSheets().forEach(function(sheet){
     var sheetUrl = sheet.getFormUrl();
-    Logger.log('Sheet url: %s', sheetUrl);
+    //Logger.log('Sheet url: %s', sheetUrl);
     
     if(sheetUrl) { // null if no connected form
       sheetUrl = trimUrl(sheetUrl);
@@ -104,16 +132,31 @@ function setDestinationSheet(form) {
       sheet.setName(formFileName);
       // Loose protecion of column titles
       sheet.getRange('1:1').protect().setWarningOnly(true);
-      Logger.log('URLs are equal');
+      Logger.log('Headings are protected');
     }
   });
 }
 
-function checkUrl() {
+function testGetDestSS() {
+  var fileId = getDestinationSpreadsheetId();
+  Logger.log('Destination file id: %s', fileId);
 }
 
+/**
+* Get id of spreadsheet file where all form responses get stored
+* @return {Spreadsheet} form response destination spreadsheet, or null if no file was found.
+*/
+function getDestinationSpreadsheetId() {
+  var files = DriveApp.getFilesByName(drive.formDestinationSpreadsheetName);
+  if(files.hasNext()) {
+    var destFile = files.next();
+    return destFile.getId();
+  } else {
+    return null;
+  }
+}
 
-// Unused
+/* Previously used when the idea was to copy forms and set their onFormSubmit trigger by another project, which didn't work
 function onGeneratedFormSubmit(e) {
   var authMode = e.authMode;
   Logger.log(authMode);
@@ -121,11 +164,11 @@ function onGeneratedFormSubmit(e) {
   Logger.log(source);
   var triggerUid = e.triggerUid;
   Logger.log(triggerUid);
-  /*
+  /
   var response = e.response;
   Logger.log(response);
   Logger.log('authMode %s\nresponse %s\nsource %s\ntriggerUid %s\n', e.authMode, e.response, e.source, e.triggerUid);
-  */
+  /
   
   var responses = source.getResponses();
   for (var i = 0; i < responses.length; i++) {
@@ -135,3 +178,4 @@ function onGeneratedFormSubmit(e) {
     Logger.log('Timestamp %s Response ID %s', timestamp, id);
   }
 }
+*/

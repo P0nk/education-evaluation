@@ -1,16 +1,28 @@
-// dataObjects format: [{timestamp:'...', name:'...', course:'...', row:i, answers:[[1,2,3,...],[3,5,6,...],]}, {}, {},]
-function insertResponses(con, formId, dataObjects) {
+/**
+* Store responses in the database
+* @param {JdbcConnection} con - active database connection
+* @param {String} formId - id of the form that the responses belong to
+* @param {Response[]} responses - responses to insert
+* @return {Response[]} 'responses' input with an additional property 'responseId' for each array element
+* 'responseId' value is equal to the generated id in the database from the insert
+*/
+function insertResponses(con, formId, responses) {
+  // previously used INSERT IGNORE INTO, but it caused problems.
+  // There's no known order in the generated keys if some batch failed
+  // this led to the system always deleting rows starting from the first row
   var query = 
     'INSERT INTO respons(enkat, respondent_namn, kurskod, inskickat) ' + 
     'VALUES((SELECT id FROM enkat WHERE form_id = ?), ?, ?, ?)';
+  con.setAutoCommit(false);
+
   // Any int is able to substitute Statement.RETURN_GENERATED_KEYS on 2nd parameter
   var statement = con.prepareStatement(query, 1); 
   statement.setString(1, formId);
   
-  for(var i = 0; i < dataObjects.length; i++) {
-    var object = dataObjects[i];
-    var timestampSheet = object.timestamp;
-    var timestamp = convertTimestamp(timestampSheet);
+  for(var i = 0; i < responses.length; i++) {
+    var object = responses[i];
+    var timestamp = object.timestamp;
+    //var timestamp = getSqlTimestamp(timestampSheet);
     var name = object.name;
     var course = object.course;
     
@@ -18,21 +30,32 @@ function insertResponses(con, formId, dataObjects) {
     statement.setString(3, course);
     statement.setString(4, timestamp);
     statement.addBatch();
-    Logger.log('<name %s> <course %s> <timestamp %s>', name, course, timestamp);
+   // Logger.log('<name %s> <course %s> <timestamp %s>', name, course, timestamp);
   }
   
   statement.executeBatch();
+  con.commit();
   var responseIds = statement.getGeneratedKeys();
   var i = 0;
   while(responseIds.next()){
-    dataObjects[i].responseId = responseIds.getInt(1);
+    responses[i].responseId = responseIds.getInt(1);
+    //Logger.log('responseId:<%s>', responses[i].responseId);
     i++;
   }
-  Logger.log('Data objects: %s', dataObjects);
-  return dataObjects;
+  //Logger.log('Data objects: %s', responses);
+  statement.close();
+  con.setAutoCommit(true);
+  return responses;
 }
 
-function insertAnswers(con, formId, dataObjects) {
+/**
+* Store answers in the database
+* @param {JdbcConnection} con - active database connection
+* @param {String} formId - id of form connected to the records
+* @param {ResponseRecords[]} records - data to store
+* @return {Boolean[]} database insert successes
+*/
+function insertAnswers(con, formId, records) {
   var query = 
       'INSERT INTO enkatfragesvar(respons, svar, enkatfraga) ' +
       'VALUES(?, TRUE, ' + 
@@ -44,36 +67,30 @@ function insertAnswers(con, formId, dataObjects) {
           'ON ef.larandemal = lm.id ' + 
         'WHERE e.form_id = ? ' + 
         'AND lm.bloom = ? ' +
-        'AND lm.nummer = ?))';
+        'AND lm.nummer = ? ' + 
+        'AND lm.version = ?))';
   var statement = con.prepareStatement(query);
   statement.setString(2, formId);
   
-  for(var i = 0; i < dataObjects.length; i++) {
-    var responseId = dataObjects[i].responseId;
+  for(var i = 0; i < records.length; i++) {
+    var responseId = records[i].responseId;
     statement.setString(1, responseId);
-    var answers = dataObjects[i].answers;
     
-    for(var j = 0; j < answers.length; j++) {
-      var bloomLevel = j + 1;
-      statement.setInt(3, bloomLevel);
+    var responseRecords = records[i].records;
+    for(var j = 0; j < responseRecords.length; j++) {
+      //Logger.log('ResponseRecords:<%s>', responseRecords[j]);
+      var bloom = responseRecords[j].bloom;
+      var number = responseRecords[j].number;
+      var version = responseRecords[j].version;
+      statement.setInt(3, bloom);
+      statement.setInt(4, number);
+      statement.setInt(5, version);
       
-      for(var k = 0; k < answers[j].length; k++) {
-        var number = answers[j][k];
-        statement.setInt(4, number);
-        statement.addBatch();
-      }
+      statement.addBatch();
     }
   }
   
   var insertResults = statement.executeBatch();
-  /*
-  var insertResults = [];
-  while(rs.next()) {
-    var insertResult = rs.getInt(1);
-    insertResults.push(insertResult);
-  }
-  rs.close();
-  */
-  
+  statement.close();
   return insertResults;
 }

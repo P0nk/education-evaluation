@@ -1,160 +1,161 @@
-function load() {
-  var con = establishDbConnection();
-  var sheet = SpreadsheetApp.getActiveSheet();
-  var programData = getEduProgramDataFromSheet(sheet);
-  var sheetData = retrieveKurserForProgram(con, programData.eduProgramTitle, programData.eduProgramYear);
-  writeSheetData(sheetData);
-  /*
-  var kurser = loadKurser(con);
-  loadLarMal(con, 1, kurser);
-  loadLarMal(con, 2, kurser);
-  */
-  
-  con.close();
+/**
+* Get data about all goal fulfillments from the database
+* @param {JdbcConnection} con - an active JDBC connection to the database
+* @param {string} programCode - the program for which to get data
+* @param {string} programStart - the arskull for which to get data
+* @param {String} timestamp - a timestamp to filter data with. Will only fetch responses sent in after this timestamp.
+* @return {MalUppfyllnad[]} - all data about goal fulfillment with the specified program and arskull
+*/
+function retrieveDataForProgram(con, programCode, programStart, timestamp) {
+  var query =
+  'SELECT id, nummer, kurskod, larandemal ' +
+  'FROM (SELECT pmt.id, pm.nummer, k.kurskod, CONCAT(pm.nummer, ".", lm.bloom, ".", lm.nummer) AS larandemal ' +
+    'FROM larandemal lm ' +
+    'INNER JOIN enkatfraga AS ef ' +
+      'ON lm.id = ef.larandemal ' +
+    'INNER JOIN enkatfragesvar AS es ' +
+      'ON ef.id = es.enkatfraga ' +
+    'INNER JOIN respons AS rs ' +
+      'ON es.respons = rs.id ' +
+    'INNER JOIN kurs AS k ' +
+      'ON rs.kurskod = k.kurskod ' +
+    'INNER JOIN programkurs AS pk ' +
+      'ON k.id = pk.kurs ' +
+    'INNER JOIN arskull AS ak ' +
+      'ON pk.arskull = ak.id ' +
+    'INNER JOIN programmal AS pm ' +
+      'ON lm.programmal = pm.id ' +
+    'INNER JOIN programmaltyp AS pmt ' +
+      'ON pm.typ = pmt.id ' +
+    'WHERE ak.program = ? ' +
+    'AND ak.terminstart = ? ' +
+    'AND es.svar = TRUE ' +
+    'AND rs.inskickat > ? ' + //to be included in some way, but not hard coded like this
+    'AND lm.version IN (SELECT MAX(version) FROM larandemal lmInner WHERE lm.id = lmInner.id)) AS with_dups ' +
+  'GROUP BY id, nummer, kurskod, larandemal ' +
+  'ORDER BY id, nummer, kurskod, larandemal';
+  var statement = con.prepareStatement(query);
+  statement.setString(1, programCode);
+  statement.setString(2, programStart);
+  statement.setString(3, timestamp);
+  var rs = statement.executeQuery();
+
+  var malUppfyllnadList = [];
+  while(rs.next()){
+    var malTyp = rs.getInt(1);
+    var malNummer = rs.getInt(2);
+    var kursKod = rs.getString(3)
+    var larandeMal = rs.getString(4);
+    var malUppfyllnad = new MalUppfyllnad(malTyp, malNummer, kursKod, larandeMal);
+    // malUppfyllnadList.push({typ:malTyp, nummer:malNummer, kurs:kursKod, larandemal:larandeMal});
+    malUppfyllnadList.push(malUppfyllnad);
+  }
+  Logger.log(malUppfyllnad);
+
+  return malUppfyllnadList;
 }
 
+/**
+* Get data about all kurs from the database
+* @param {JdbcConnection} con - an active JDBC connection to the database
+* @param {string} programkod - the program for which to get kurs
+* @param {string} terminstart - the arskull for which to get kurs
+* @return {Kurs[]} - data about all kurs with the specified programkod and terminstart
+*/
+function retrieveProgramKurs(con, programkod, terminstart) {
+  var query =
+  'SELECT kurskod, namn, ar, inriktning, inriktning_namn FROM ' +
+    '((SELECT k.kurskod, k.namn, pk.ar, null AS inriktning, null AS inriktning_namn ' +
+    'FROM kurs k ' +
+    'INNER JOIN programkurs AS pk ' +
+      'ON k.id = pk.kurs ' +
+    'INNER JOIN arskull AS ak ' +
+      'ON ak.id = pk.arskull ' +
+    'WHERE ak.program = ? ' +
+    'AND ak.terminstart = ? ' +
+    'ORDER BY pk.ar, k.namn) ' +
+  'UNION ' +
+  '(SELECT k.kurskod, k.namn, ik.ar, i.id, i.namn ' +
+  'FROM kurs AS k ' +
+  'INNER JOIN inriktningskurs AS ik ' +
+	'ON k.id = ik.kurs ' +
+  'INNER JOIN inriktning AS i ' +
+	'ON ik.inriktning = i.id ' +
+  'INNER JOIN arskull AS ak ' +
+	'ON ak.id = i.arskull ' +
+  'WHERE ak.program = ? ' +
+  'AND ak.terminstart = ?)) AS unionized ' +
+  'ORDER BY ar, inriktning, namn';
 
-function initialize(con) {
-  var kurser = retrieveKursFromDb(con);  
-  var sheet = SpreadsheetApp.getActiveSheet();
-  var kursCol = sheet.getRange(placementKurs.row, placementKurs.col, kurser.length);
-  //setDevDataSheet('amountKurs', kurser.length);
-  kursCol.setValues(kurser);
-  
+  var statement = con.prepareStatement(query);
+  statement.setString(1, programkod);
+  statement.setString(2, terminstart);
+  statement.setString(3, programkod);
+  statement.setString(4, terminstart);
+  var rs = statement.executeQuery();
+
+  var kurser = [];
+  while(rs.next()) {
+    var kurskod = rs.getString(1);
+    var kursnamn = rs.getString(2);
+    var arskurs = rs.getInt(3);
+    var inriktningId = rs.getInt(4);
+    var inriktning = rs.getString(5);
+
+    // var kurs = {kurskod:kurskod, kursnamn:kursnamn, arskurs:arskurs};
+    var kurs = new Kurs(kurskod, kursnamn, arskurs);
+
+    if(inriktningId && inriktning) {
+        kurs.inriktningId = inriktningId;
+        kurs.inriktning = inriktning;
+    }
+
+    kurser.push(kurs);
+  }
+
+  rs.close();
+  statement.close();
   return kurser;
 }
 
-function writeSheetData(sheetData){
-  var sheet = SpreadsheetApp.getActiveSheet();
-  var amountKurser = getDevDataSheet('amountKurs');
-  var rowStart = placementKurs.row;
-  var colStart = placementKurs.col;
-  var kurser = sheet.getRange(rowStart, colStart, amountKurser).getValues();
-  var programData = [];
-  // Index in sheets start on 1, array index start on 0
-  for (var i = 0; i < kurser.length; i++) {
-    //var kurs = getDevDataRow(i); Does not work yet since no metadata is set in initialize()
-    var kurs = kurser[i][0].toString().toLowerCase().trim();
-    var kursData = new Array(amountExMal);
-    for(var k = 0; k < kursData.length; k++) {
-      kursData[k] = '';
-    }
-    
-    for (var j = 0; j < sheetData.length; j++) {
-      var kursToFill = sheetData[j].kurs.toString().toLowerCase().trim();
-      if (kurs == kursToFill){
-        var exMal = sheetData[j].examensmal;
-        var lrMal = sheetData[j].larandemal.toString();
-        kursData[exMal-1] = kursData[exMal-1].concat(' ' + lrMal);
-      }
-    }
-    programData.push(kursData);
-  }
-  
-  var range = sheet.getRange(placementData.row, placementData.col, kurser.length, placementData.colEnd);
-  range.setValues(programData);
-}
-
-function retrieveKurserForProgram(con, eduProgram, eduYear) {
-  //Logger.log(eduProgram);
-  //Logger.log(eduYear);
-  var query = 
-      "SELECT lm.examensmal, k.kurskod, CONCAT(lm.examensmal, '.', lm.bloom, '.', lm.nummer) AS larandemal " + 
-      "FROM larandemal lm " + 
-      "INNER JOIN enkatfraga AS ef " + 
-        "ON lm.id = ef.larandemal " + 
-      "INNER JOIN enkatfragesvar AS es " +
-        "ON ef.id = es.enkatfraga " +
-      "INNER JOIN respons AS rs " +
-        "ON es.respons = rs.id " + 
-      "INNER JOIN enkatbedomning AS eb " +
-        "ON rs.id = eb.respons " +
-      "INNER JOIN kurs AS k " + 
-        "ON rs.kurskod = k.kurskod " + 
-      "INNER JOIN programkurs AS pk " + 
-        "ON k.id = pk.kurs " + 
-      "INNER JOIN arskull AS ak " + 
-        "ON pk.arskull = ak.id " + 
-      "WHERE ak.program = ? " + 
-      "AND ak.ar = ? " + 
-      "AND es.svar = TRUE " + 
-      "AND eb.godkand = TRUE " + 
-      "AND lm.version IN (SELECT MAX(version) FROM larandemal lmInner WHERE lm.id = lmInner.id) " + 
-      "ORDER BY lm.examensmal, k.kurskod"; 
+/**
+* Get data about programmal from the database
+* @param {JdbcConnection} con - a JDBC connection to the database
+* @param {string} programKod - the program code to find programmal for
+* @return {ProgramMalTyp[]} - data about all programmal for the specified program
+*/
+function retrieveProgramMal(con, programKod) {
+  var query =
+  'SELECT pm.beskrivning, pm.nummer, typ.id, typ.typ ' +
+  'FROM programmal AS pm ' +
+  'INNER JOIN programmaltyp AS typ ' +
+	'ON pm.typ = typ.id ' +
+  'INNER JOIN programprogrammal AS ppm ' +
+	'ON pm.id = ppm.programmal ' +
+  'INNER JOIN program AS p ' +
+	'ON ppm.program = p.id ' +
+  'WHERE p.programkod = ? ' +
+  'ORDER BY typ.id, pm.nummer';
   var statement = con.prepareStatement(query);
-  statement.setString(1, eduProgram);
-  statement.setInt(2, eduYear);
+  statement.setString(1, programKod);
   var rs = statement.executeQuery();
-  
-  var malUppfyllnad = [];
-  while(rs.next()){
-    var examensmal = rs.getInt(1);
-    var kurskod = rs.getString(2)
-    var larandemal = rs.getString(3);
-    malUppfyllnad.push({'examensmal':examensmal, 'kurs':kurskod, 'larandemal':larandemal});
-  }
-  Logger.log(malUppfyllnad);
-  
-  return malUppfyllnad;
-}
 
-function loadLarMal(con, exMal, kurser) {
-  for(i=0; i<kurser.length; i++) {
-    var kurs = kurser[i];
-    var larMal = retrieveKursLarMal(con, exMal, kurs);
-    var cellValue = larMal.length ? larMal.join(", ") : "-";
-    var cellRow = placementData.row + i;
-    var cellCol = placementData.col + (exMal - 1);
-    writeArrayToCell(cellValue, cellRow, cellCol);
-  }
-}
-
-// Kurs
-function retrieveKursFromDb(connection) {
-  var statement = connection.createStatement();
-  var query = "SELECT kurskod FROM kurs ORDER BY id";
-  var resultSet = statement.executeQuery(query);
-  
-  var kurs = [];
-  while(resultSet.next()) {
-    var kursKod = resultSet.getString(1);
-    kurs.push([kursKod]);
-  }
-  
-  resultSet.close();
-  statement.close();
-  return kurs;
-}
-
-function retrieveLarMal(connection, exMal, kursKod) {
-  // TODO
-  // Hur slipper vi skapa massor av queries? ((11 examensmål) * (antal kurser)) blir alldeles för stor belastning.
-  // Vi borde kunna ha en stor query some returnerar kurskod-examensmålspar med en generated column för lärandemål (typ "1.2.2"), alltså 3 kolumner i yttersta SELECT-satsen.
-}
-
-function retrieveKursLarMal(connection, exMal, kursKod) {
-  if(exMal == null || kursKod == null) {
-    return [];
-  }
-  
-  var query = "SELECT CONCAT(examensmal,'.',bloom,'.',nummer) AS larandemal FROM larandemal WHERE examensmal = ? AND id IN " + 
-    "(SELECT larandemal FROM enkatfraga WHERE id IN " +
-      "(SELECT enkatfraga FROM enkatfragesvar WHERE svar = TRUE AND respons IN " + 
-        "(SELECT id FROM respons WHERE kurskod = ?))) " + 
-          "ORDER BY examensmal, bloom, nummer";
-  var statement = connection.prepareStatement(query);
-  statement.setInt(1, exMal);
-  statement.setString(2, kursKod);
-  var rs = statement.executeQuery();
-  
-  var lMal = [];
+  var programMal = [];
   while(rs.next()) {
-    //Logger.log(rs.getString(1));
-    lMal.push(rs.getString(1));
+    var beskrivning = rs.getString(1);
+    var nummer = rs.getInt(2);
+    var typId = rs.getInt(3);
+    var typBeskrivning = rs.getString(4);
+
+    //var curMal = programMal[typId];
+    if(!(programMal[typId])) {
+      // programMal[typId] = {typ:typBeskrivning, mal:[]};
+      programMal[typId] = new ProgramMalTyp(typBeskrivning);
+    }
+    programMal[typId].mal[nummer] = beskrivning;
   }
-  
+
   rs.close();
   statement.close();
-  
-  return lMal;
+  return programMal;
 }

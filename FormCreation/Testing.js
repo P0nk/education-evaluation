@@ -1,3 +1,5 @@
+/* Random functions made to run manually to test stuff */
+
 function logDate() {
   var date = new Date();
   var day = date.getDate();
@@ -39,4 +41,9 @@ function stringTest() {
 
 function testValidation() {
   var validation = FormApp.createTextValidation().setHelpText('Help text 123');
+}
+
+function testRange() {
+  var arr = range(5, 10);
+  Logger.log('range:%s', arr);
 }
