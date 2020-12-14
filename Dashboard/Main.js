@@ -109,10 +109,13 @@ function load() {
   var programCode = programData[mdKey.programCode];
   var programStart = programData[mdKey.programStart];
   
-  var userDate = getUserRequestedDate(sheet);
-  var timestamp = (userDate instanceof Date) ? dateToTimestamp(userDate) : getSmallestTimestamp();
+  var userMinDate = getUserRequestedMinimumDate(sheet);
+  var minTimestamp = (userMinDate instanceof Date) ? dateToTimestamp(userMinDate) : getSmallestTimestamp();
   
-  var sheetData = retrieveDataForProgram(con, programCode, programStart, timestamp);
+  var userMaxDate = getUserRequestedMaximumDate(sheet);
+  var maxTimestamp = (userMaxDate instanceof Date) ? dateToTimestamp(userMaxDate) : getLargeTimestamp();
+  
+  var sheetData = retrieveFilteredDataForProgram(con, programCode, programStart, minTimestamp, maxTimestamp);
   //var sheetData = retrieveDataForProgram(con, programCode, programStart, timestampStart, timestampEnd);
   writeSheetData(sheet, sheetData);
   

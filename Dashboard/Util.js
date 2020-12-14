@@ -31,12 +31,20 @@ function getCellValue(sheet, row, col) {
 }
 
 /**
-* Generate the smallest possible timestamp that all other normal timestamps should be greated than
+* Generate the smallest possible timestamp that all other normal timestamps should be greater than
 * @return {String} the smallest timestamp
 */
 function getSmallestTimestamp() {
   var timestamp = '00-00-00 00:00:00';
   return timestamp;
+}
+
+/**
+* Generate a large timestamp that all timestamps in modern time should be smaller than
+* @return {String} the smallest timestamp
+*/
+function getLargeTimestamp() {
+  return '2100-12-30 23:59:59';
 }
 
 /**

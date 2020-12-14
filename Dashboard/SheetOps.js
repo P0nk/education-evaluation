@@ -312,13 +312,26 @@ function writeSheetData(sheet, sheetData) {
 }
 
 /**
-* Get date from direct user input into the sheet
+* Get minimum date from direct user input into the sheet
 * @param {Sheet} sheet - sheet to get date from
 * @return {Object} the value from the date box. Is possibly a Date object.
 */
-function getUserRequestedDate(sheet) {
-  var row = loc.date.row;
-  var col = loc.date.col;
+function getUserRequestedMinimumDate(sheet) {
+  var row = loc.minDate.row;
+  var col = loc.minDate.col;
+  var dateCell = sheet.getRange(row, col).getCell(1, 1);
+  var possibleDate = dateCell.getValue();
+  return possibleDate;
+}
+
+/**
+* Get maximum date from direct user input into the sheet
+* @param {Sheet} sheet - sheet to get date from
+* @return {Object} the value from the date box. Is possibly a Date object.
+*/
+function getUserRequestedMaximumDate(sheet) {
+  var row = loc.maxDate.row;
+  var col = loc.maxDate.col;
   var dateCell = sheet.getRange(row, col).getCell(1, 1);
   var possibleDate = dateCell.getValue();
   return possibleDate;

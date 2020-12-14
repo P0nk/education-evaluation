@@ -30,7 +30,6 @@ function retrieveDataForProgram(con, programCode, programStart, timestamp) {
     'WHERE ak.program = ? ' + 
     'AND ak.terminstart = ? ' + 
     'AND es.svar = TRUE ' + 
-    'AND rs.inskickat > ? ' + //to be included in some way, but not hard coded like this  'AND rs.inskickat BETWEEN ? AND ?';
     'AND lm.version IN (SELECT MAX(version) FROM larandemal lmInner WHERE lm.id = lmInner.id)) AS with_dups ' + 
   'GROUP BY id, nummer, kurskod, larandemal ' +
   'ORDER BY id, nummer, kurskod, larandemal';
@@ -54,7 +53,15 @@ function retrieveDataForProgram(con, programCode, programStart, timestamp) {
   return malUppfyllnadList;
 }
 
-function retrieveDataForProgramTest(con, programCode, programStart, timestampStart,timestampEnd ) {
+/**
+* Get data about all goal fulfillments within a specified time range from the database
+* @param {JdbcConnection} con - an active JDBC connection to the database
+* @param {string} programCode - the program for which to get data
+* @param {string} programStart - the arskull for which to get data
+* @param {String} timestamp - a timestamp to filter data with. Will only fetch responses sent in after this timestamp.
+* @return {MalUppfyllnad[]} - all data about goal fulfillment with the specified program and arskull
+*/
+function retrieveFilteredDataForProgram(con, programCode, programStart, timestampFilterStart, timestampFilterEnd) {
   var query = 
   'SELECT id, nummer, kurskod, larandemal ' + 
   'FROM (SELECT pmt.id, pm.nummer, k.kurskod, CONCAT(pm.nummer, ".", lm.bloom, ".", lm.nummer) AS larandemal ' +
@@ -85,8 +92,8 @@ function retrieveDataForProgramTest(con, programCode, programStart, timestampSta
   var statement = con.prepareStatement(query);
   statement.setString(1, programCode);
   statement.setString(2, programStart);
-  statement.setString(3, timestampStart);
-  statement.setString(3, timestampEnd);
+  statement.setString(3, timestampFilterStart);
+  statement.setString(4, timestampFilterEnd);
   var rs = statement.executeQuery();
   
   var malUppfyllnadList = [];
