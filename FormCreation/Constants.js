@@ -27,5 +27,5 @@ var drive = {
   generatedFormFolderId: '1KULj-zDtVi32m3EoYwxG0UvDHzO7CzBu',
   generatedFormFolderName: 'Genererade formulär',
   formDestinationSpreadsheet: '1AKkBAjYHo3ChPA7wCshrVcnShqwznv36wvrLNSJnsDo',
-  formDestinationSpreadsheetName: 'Formulärssvar'
+  formDestinationSpreadsheetName: 'Formulärsvar'
 }
