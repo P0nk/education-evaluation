@@ -8,10 +8,6 @@ function createNewForm() {
   var folder = DriveApp.getFoldersByName(drive.generatedFormFolderName).next();
   var folderId = folder.getId();
   moveFileToFolder(form.getId(), folderId);
-  // Remains from when a template was used
-  //var templateFile = DriveApp.getFileById(drive.templateFormId);
-  //var templateCopy = templateFile.makeCopy().setName(generateFormFileTitle()).getId();
-  // moveFile(templateCopy, drive.generatedFormFolderId); // Not necessary if template file is in same folder
   setDestinationSheet(form);
   return form;
 }

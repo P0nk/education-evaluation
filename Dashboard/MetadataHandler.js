@@ -4,7 +4,7 @@
 * @param {String} program - program code of the education program, ex: 'TIDAB'
 * @param {String} startTime - semester and year of the program, ex: 'HT17'
 */
-function setProgramDataInSheet(sheet, program, startTime) {
+function setProgramDataInSheet(sheet, program, startTime) {  
   var sheetMode = Common.MODE_SHEET;
   Common.addDevData(sheetMode, mdKey.programCode, program);
   Common.addDevData(sheetMode, mdKey.programStart, startTime);
@@ -19,7 +19,7 @@ function getProgramDataFromSheet(sheet) {
   var sheetMode = Common.MODE_SHEET;
   var program = Common.getDevData(sheetMode, mdKey.programCode);
   var startPeriod = Common.getDevData(sheetMode, mdKey.programStart);
-
+  
   var programData = {};
   programData[mdKey.programCode] = program;
   programData[mdKey.programStart] = startPeriod;
@@ -35,17 +35,17 @@ function deleteSheetMultiDevData(sheet, keys) {
     var resource = createBatchDeleteSheetResource(sheet, keys[i]);
     resources.push(resource);
   }
-
+  
   Sheets.Spreadsheets.batchUpdate({requests:resources}, spreadsheetId);
 }
 
 function createBatchDeleteSheetResource(sheet, key) {
   var sheetId = sheet.getSheetId();
   var resource = {
-  "deleteDeveloperMetadata":
-    {"dataFilter":
-      {"developerMetadataLookup":
-        {"metadataKey": key, "locationType":"SHEET","metadataLocation":
+  "deleteDeveloperMetadata": 
+    {"dataFilter": 
+      {"developerMetadataLookup": 
+        {"metadataKey": key, "locationType":"SHEET","metadataLocation": 
          {"locationType":"SHEET", "sheetId":sheetId}}}}};
   return resource;
 }
@@ -63,7 +63,7 @@ function setDevDataRow(row) {
 
 /* Unused
 function getDevDataRow(row) {
-  // row = 4;
+  // row = 4; 
   var rowA1Notation = row + ':' + row;
   var sheet = SpreadsheetApp.getActiveSheet();
   var range = sheet.getRange(rowA1Notation);
@@ -81,10 +81,10 @@ function setDevDataSheet(sheet, key, value){
 */
 
 /* Moved to Common
-function getDevDataSheet(sheet, searchKey) {
+function getDevDataSheet(sheet, searchKey) {  
   var mdFinder = sheet.createDeveloperMetadataFinder().withLocationType(SpreadsheetApp.DeveloperMetadataLocationType.SHEET);
   var metadata = mdFinder.withKey(searchKey).find()[0].getValue();
-
+  
   return metadata;
 }
 */
@@ -107,7 +107,7 @@ function getDevDataSpreadsheet() {
   for(var i = 0; i < metadata.length; i++) {
     metadataValues.push({key:metadata[i].getKey(), value:metadata[i].getValue()});
   }
-
+  
   return metadataValues;
 }
 */
@@ -121,7 +121,7 @@ function getAllDevDataSheet() {
   for(var i = 0; i < metadata.length; i++) {
     metadataValues.push({key:metadata[i].getKey(), value:metadata[i].getValue()});
   }
-
+  
   return metadataValues;
 }
 */
@@ -140,7 +140,7 @@ function deleteDevData(key) {
       }
     }
   }];
-
+  
   Sheets.Spreadsheets.batchUpdate({requests:resource}, spreadsheetId);
 }
 */

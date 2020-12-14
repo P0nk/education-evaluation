@@ -18,7 +18,6 @@ function establishDbConnection() {
   var password = getPropertyValue('DB_PASSWORD');
   var subname = getPropertyValue('DB_SUBNAME'); // Subname is called 'Instance connection name' in console overview
   var dbUrl = 'jdbc:google:mysql://' + subname + '/' + schema;
-  
   var con = Jdbc.getCloudSqlConnection(dbUrl, user, password);
   return con;
 }

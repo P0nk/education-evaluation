@@ -9,12 +9,9 @@
     "libraries": [{
       "userSymbol": "Common",
       "libraryId": "1MZMgSCWDKF9SRKpKUsh8mBepK00bKEdrpvYNgYRu2a0ydKy64zSESlEr",
-      "version": "8"
+      "version": "10"
     }]
   },
   "exceptionLogging": "STACKDRIVER",
-  "oauthScopes": ["https://www.googleapis.com/auth/script.external_request",
-                 "https://www.googleapis.com/auth/spreadsheets",
-                 "https://www.googleapis.com/auth/spreadsheets.currentonly",
-                 "https://www.googleapis.com/auth/sqlservice"]
+  "oauthScopes": ["https://www.googleapis.com/auth/script.external_request", "https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/spreadsheets.currentonly", "https://www.googleapis.com/auth/sqlservice"]
 }

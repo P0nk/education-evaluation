@@ -121,22 +121,23 @@ function parseRows(sheet, levels) {
 */
 function extractAnswers(multiAnswerText) {
   var regex = /(\d+):\s.*?\[v(\d+)\]/g;
-  // Old regex: var matches = multiAnswerText.match(/\d+:\s/g);
   var answers = [];
   
-  // This is what you have to do to match multiple texts with multiple capture groups.
-  // matchAll() could possibly be used in the future
-  // exec while-loop: https://stackoverflow.com/questions/14707360/javascript-regex-multiple-captures-again
   while ((match = regex.exec(multiAnswerText)) != null) {
     var number = match[1];
     var version = match[2];
     var answer = new Answer(number, version);
     answers.push(answer);
   }
-  //Logger.log('All matches:<%s>', answers);
   
   return answers;
 }
+
+// Old regex: var matches = multiAnswerText.match(/\d+:\s/g);
+  
+// This is what you have to do to match multiple texts with multiple capture groups.
+// matchAll() could possibly be used in the future
+// exec while-loop: https://stackoverflow.com/questions/14707360/javascript-regex-multiple-captures-again
 
 /** 
 * Extract bloom levels from header text. 

@@ -153,14 +153,14 @@ function loadLarandemalListaToSheet(larandemalStructure, progmal){
   progmalText.setVerticalAlignment('middle');
   progmalText.setHorizontalAlignment('left');
   currentSheetRow += progmalText.getNumRows() + 2; 
-    
+  var bloomNames = Common.BLOOM;
   for(var i = 0; i < antalBloomNivaer; i++){
     var numberOfLarandemal = larandemalStructure.getLarandemalByBloomLevel(progmal.typ, progmal.nummer, (i+1)).length;
     if(numberOfLarandemal === 0){
     //Nothing on this bloomlevel skip
       continue;
     }
-    var bloomString = Utilities.formatString('%s.%s Lärandemål (Bloom nivå %s - %s)', progmal.nummer, (i + 1), (i + 1), BLOOMLEVELS[i]);
+    var bloomString = Utilities.formatString('%s.%s Lärandemål (Bloom nivå %s - %s)', progmal.nummer, (i + 1), (i + 1), bloomNames[i]);
     var bloomText = sheet.getRange(currentSheetRow, 1, 2, 6);
     bloomText = bloomText.merge();
     bloomText.setValue(bloomString);

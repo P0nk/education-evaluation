@@ -106,13 +106,14 @@ function load() {
   var con = Common.establishDbConnection();
   var sheet = SpreadsheetApp.getActiveSheet();
   var programData = getProgramDataFromSheet(sheet);
-  var programCode = programData[mdKey.programCode];j
+  var programCode = programData[mdKey.programCode];
   var programStart = programData[mdKey.programStart];
   
   var userDate = getUserRequestedDate(sheet);
   var timestamp = (userDate instanceof Date) ? dateToTimestamp(userDate) : getSmallestTimestamp();
   
   var sheetData = retrieveDataForProgram(con, programCode, programStart, timestamp);
+  //var sheetData = retrieveDataForProgram(con, programCode, programStart, timestampStart, timestampEnd);
   writeSheetData(sheet, sheetData);
   
   con.close();

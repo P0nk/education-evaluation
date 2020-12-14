@@ -9,10 +9,10 @@ function writeProgramMalData(sheet, programMal) {
   if(!Array.isArray(programMal) || programMal.length == 0) {
     return;
   }
-
+  
   var malData = [];
   var totalAmountCols = 0;
-
+  
   for(var i in programMal) {
     // Get properties of current programmal
     var malTyp = programMal[i].typ;
@@ -20,19 +20,19 @@ function writeProgramMalData(sheet, programMal) {
     if(mal.length <= 0) {
       break;
     }
-
+    
     if(typeof(lastCol) == 'undefined') {
       var lastCol = loc.malText.col - 1;
     }
-
+    
     // Write programmal title
     var titleWidth = 1;
-    var titleHeight = (loc.malNummer.rowEnd - loc.malText.row + 1)
+    var titleHeight = (loc.malNummer.rowEnd - loc.malText.row + 1) 
     var titleRange = sheet.getRange(loc.malText.row, (lastCol + 1), titleHeight, titleWidth);
     lastCol += titleWidth;
     titleRange.getCell(1, 1).setValue(malTyp);
     setFormattingMalTyp(titleRange);
-
+    
     // Make writeable arrays
     var malTexter = [];
     var malNummer = [];
@@ -42,50 +42,50 @@ function writeProgramMalData(sheet, programMal) {
       malNummer.push(j);
     }
     var amountMal = malNummer.length;
-
+    
     // Calculate ranges to write values to
-
+    
     // These ranges will be merged visually.
     var textHeight = (loc.malText.rowEnd - loc.malText.row + 1);
     var textMergeRange = sheet.getRange(loc.malText.row, (lastCol + 1), textHeight, amountMal);
-
+    
     var numHeight = (loc.malNummer.rowEnd - loc.malNummer.row + 1);
     var numMergeRange = sheet.getRange(loc.malNummer.row, (lastCol + 1), numHeight, amountMal);
-
+    
     // Needed due to merged cells. Only values written to first row and column in range will be visible.
     var textWriteRange = sheet.getRange(loc.malText.row, (lastCol + 1), 1, amountMal);
     var numWriteRange = sheet.getRange(loc.malNummer.row, (lastCol + 1), 1, amountMal);
     lastCol += amountMal;
-
+    
     // Write values
     textWriteRange.setValues([malTexter]);
     numWriteRange.setValues([malNummer]);
-
+    
     // Set layout
     setFormattingMalText(textMergeRange);
     setFormattingMalNum(numMergeRange);
-
+    
     var amountCols = titleWidth + amountMal;
     totalAmountCols += amountCols;
-
+    
     // Title placement
     var titleColStart = titleRange.getColumn();
-
+    
     // Data placement. Could use either text/num range
     var dataColStart = textMergeRange.getColumn();
     var dataColEnd = textMergeRange.getLastColumn();
     // malData.push({typId:i, typ:extraMalTyp, startCol:startCol, endCol:endCol, amount:(amountExtraMal + 1)});
-
+    
     // Save placement about this typ
     var malPlacement = new ProgramMalPlacement(i, malTyp, titleColStart, dataColStart, dataColEnd, malNummer);
     malData.push(malPlacement);
   }
-
+  
   // Set width of all columns that were written to
   var firstCol = loc.malText.col;
   var colWidth = 150;
   sheet.setColumnWidths(firstCol, totalAmountCols, colWidth);
-
+  
   return malData;
 }
 
@@ -97,11 +97,11 @@ function writeProgramMalData(sheet, programMal) {
 */
 function writeProgramKursData(sheet, kurser) {
   var amountKurs = kurser.length;
-
+  
   var kursData = [];
   var curSection = {arskurs: null, inriktningId: null};
   var sections = [];
-
+  
   for(var i in kurser) {
     var curKurs = kurser[i];
     var kurskod = curKurs.kurskod;
@@ -109,40 +109,40 @@ function writeProgramKursData(sheet, kurser) {
     var arskurs = curKurs.arskurs;
     // for(var x in y) doesn't generate integer, but rather a decimal number
     var rowIndex = parseInt(i) + 1;
-
+    
     kursData.push([kurskod, kursnamn]);
-
+    
     if(arskurs != curSection.arskurs) {
       var arskursRowText = arskursSectionPrefix + arskurs;
       //var section = {text: arskursRowText, row: i, inriktning: false};
       var section = new Section(arskursRowText, rowIndex, false);
       sections.push(section);
-
+      
       curSection.arskurs = arskurs;
     }
-
+    
     if(('inriktning' in curKurs) && ('inriktningId' in curKurs)) {
       if(curKurs.inriktningId != curSection.inriktningId) {
         var inriktning = curKurs.inriktning;
         //var section = {text: inriktning, row: i, inriktning: true};
         var section = new Section(inriktning, rowIndex, true);
         sections.push(section);
-
+        
         curSection.inriktningId = curKurs.inriktningId;
       }
     }
   }
-
+  
   // Write values
   var kursWidth = (loc.kurs.colEnd - loc.kurs.col + 1);
   var kursRange = sheet.getRange(loc.kurs.row, loc.kurs.col, amountKurs, kursWidth);
   kursRange.setValues(kursData);
-
+  
   // Set layout
   var rowHeight = layout.dataRowHeight;
   sheet.setRowHeights(loc.kurs.row, amountKurs, rowHeight);
   setFormattingKurs(kursRange);
-
+  
   return sections;
 }
 
@@ -157,7 +157,7 @@ function addSections(sheet, sections, numCols) {
     var text = sections[i].text;
     var row = sections[i].row;
     var subsection = sections[i].inriktning;
-
+    
     insertSection(sheet, row, text, numCols, subsection);
   }
 }
@@ -175,14 +175,14 @@ function insertSection(sheet, rowIndex, text, numCols, subsection) {
   sheet.insertRowBefore(newRowIndex); // New row will have same index since it's placed before
   var rowHeight = layout.headerRowHeight;
   sheet.setRowHeight(newRowIndex, rowHeight);
-
+  
   var kursRange = sheet.getRange(newRowIndex, loc.kurs.col, 1, loc.kurs.colEnd);
   kursRange.getCell(1, 1).setValue(text);
   var malRange = sheet.getRange(newRowIndex, loc.malNummer.col, 1, numCols);
   // malRange.getCell(1, 1).setValue(text);
-
+  
   setFormattingSectionKurs(kursRange);
-
+  
   if(subsection) {
     setFormattingSubsection(kursRange);
     setFormattingSubsection(malRange);
@@ -192,13 +192,6 @@ function insertSection(sheet, rowIndex, text, numCols, subsection) {
   }
 }
 
-<<<<<<< HEAD
-// Unused
-function writeArrayToCell(array, cellRow, cellCol) {
-  var sheet = SpreadsheetApp.getActiveSheet();
-  var cell = sheet.getRange(cellRow, cellCol);
-  cell.setValue(array.toString());
-=======
 /**
 * Write all content
 * @param {Sheet} sheet - the sheet to write to. Has to be initialized (programmaldata & kursdata written already)
@@ -209,19 +202,19 @@ function writeSheetData(sheet, sheetData) {
   var amountDataRows = Common.getDevDataSheet(sheet, mdKey.dataRows);
   var malData = JSON.parse(malDataText);
   var startIndex = loc.data.col;
-
+  
   // Get kurser from sheet
   var rowStart = loc.kurs.row;
   var colStart = loc.kurs.col;
   var amountCols = (loc.kurs.colEnd - loc.kurs.col) + 1;
   var kurser = sheet.getRange(rowStart, colStart, amountDataRows, amountCols).getValues();
-
+  
   var malPlacement = [];
   var amountDataCols = 0;
-
+ 
   for(var i in malData) {
     amountDataCols += malData[i].amount;
-
+    
     /* old method
     var typId = malData[i].typId;
     var startIndex = malData[i].startCol - loc.data.col;
@@ -229,28 +222,28 @@ function writeSheetData(sheet, sheetData) {
     malPlacement[typId] = {startIndex:startIndex, endIndex:endIndex};
     */
   }
-
+  
   var programData = [];
   // Index in sheets start on 1, array index start on 0
   for (var i in kurser) {
     var kursKod = kurser[i][loc.kurs.colKursKod - 1].toString().toLowerCase().trim();
     var kursNamn = kurser[i][loc.kurs.colKursNamn - 1].toString().toLowerCase().trim();
     var kursData = [];
-
+    
     // Initialize kursData to empty string to make array fit into range
     for(var j = 0; j < amountDataCols; j++) {
       kursData[j] = '';
     }
-
+    
     //programData.push(kursData);
     //Logger.log('programData: <%s>', programData);
-
+ 
     // A section
     if(kursKod && !kursNamn) {
       programData.push(kursData);
       continue;
     }
-
+    
     for (var j in sheetData) {
       var retrievedKursKod = sheetData[j].kurs.toString().toLowerCase().trim();
       if (kursKod == retrievedKursKod) {
@@ -258,7 +251,7 @@ function writeSheetData(sheet, sheetData) {
         var malTyp = Math.round(sheetData[j].typ);
         var malNummer = sheetData[j].nummer;
         var malNummerIndex = -1;
-
+        
         // Get index
         for(var k in malData) {
           // round for the comparison later
@@ -275,25 +268,25 @@ function writeSheetData(sheet, sheetData) {
             // Logger.log('malNummerList:%s', malData[k].malNummer);
             // Logger.log('malNummer:%s', malNummer);
             // Logger.log('malNummerIndex:%s', malNummerIndex);
-
+            
             var curMalStartIndex = malData[k].titleStartCol;
             // + 1 since Sheets is 1-indexed
             var kursDataIndex = (curMalStartIndex - startIndex) + malNummerIndex + 1;
-
+            
             // Logger.log('cMSI type:%s, sI type:%s, mNI type:%s', typeof curMalStartIndex, typeof startIndex, typeof malNummerIndex);
             // Logger.log('kursDataIndex:%s', kursDataIndex);
             //Logger.log('mNI:%s, cMSI:%s, kDI:%s', malNummerIndex, curMalStartIndex, kursDataIndex);
           }
         }
-
+        
         // Invalid index
         if(malNummerIndex == -1) {
           continue;
-        }
-
+        } 
+        
         //var kursDataIndex = malPlacement[malTyp].startIndex + malNummer - 1;
-
-
+        
+        
         var lrMal = sheetData[j].larandemal.toString();
         // If the index already has a string; append. Otherwise set it.
         if(kursData[kursDataIndex].trim()) {
@@ -305,16 +298,16 @@ function writeSheetData(sheet, sheetData) {
         }
       }
     }
-
+    
     programData.push(kursData);
   }
-
+  
   var range = sheet.getRange(loc.data.row, loc.data.col, kurser.length, amountDataCols);
   //var width = range.getNumColumns();
   //var height = range.getNumRows();
   //Logger.log('Program data:<%s>, Length:<%s>', programData, programData.length);
   //Logger.log('Width:<%s>, Height:<%s>', width, height);
-
+  
   range.setValues(programData);
 }
 
@@ -329,7 +322,6 @@ function getUserRequestedDate(sheet) {
   var dateCell = sheet.getRange(row, col).getCell(1, 1);
   var possibleDate = dateCell.getValue();
   return possibleDate;
->>>>>>> develop
 }
 
 /**
@@ -338,26 +330,26 @@ function getUserRequestedDate(sheet) {
 * @param {ProgramMalTyp[]} programMal - the data to write
 * @return {ProgramMalPlacement[]} - data about how things were written to the sheet
 */
-/* Old. Should be avoided, contains hard coded stuff.
+/* Old. Should be avoided, contains hard coded stuff. 
 function writeProgramMalData(sheet, programMal) {
   // If no data exists at all
   if(!Array.isArray(programMal) || programMal.length == 0) {
     return;
   }
-
+  
   var malData = [];
   var examensMalId = 1;
   var examensMal = programMal[examensMalId];
   var typ = examensMal.typ;
-
+  
   // If no data exists about current programmal
   if(!Array.isArray(examensMal.mal) || examensMal.mal.length == 0) {
     return;
   }
-
+  
   var amountExMal = examensMal.mal.length - 1;
   var amountMal = amountExMal; // -1 since no mal on first index
-
+  
   var beskrivningar = [];
   var malNummer = [];
   for(var i in examensMal) {
@@ -365,25 +357,25 @@ function writeProgramMalData(sheet, programMal) {
     beskrivningar.push(beskrivning);
     malNummer.push(i);
   }
-
+  
   var numValueRange = sheet.getRange(loc.malNummer.row, loc.malNummer.col, 1, amountMal);
   var textValueRange = sheet.getRange(loc.malText.row, loc.malText.col, 1, amountMal);
-
+  
   numValueRange.setValues([malNummer]);
   textValueRange.setValues([beskrivningar]);
-
+  
   // Start formatting the sheet
   var numRange = sheet.getRange(loc.malNummer.row, loc.malNummer.col, (loc.malNummer.rowEnd - loc.malNummer.row) + 1, amountMal);
   setFormattingMalNum(numRange);
   var textRange = sheet.getRange(loc.malText.row, loc.malText.col, (loc.malText.rowEnd - loc.malText.row) + 1, amountMal);
   setFormattingMalText(textRange);
   var lastCol = textRange.getLastColumn();
-
+  
   //malData.push({typId:examensMalId, typ:typ, startCol:loc.malText.col, endCol:lastCol, amount:amountMal});
   var malPlacement = new ProgramMalPlacement(examensMalId, typ, loc.malText.col, lastCol, amountMal);
   malData.push(malPlacement);
-
-
+  
+  
   for(var i = 2; i < programMal.length; i++) {
     // Properties of current programmal
     var extraMalTyp = programMal[i].typ;
@@ -392,13 +384,13 @@ function writeProgramMalData(sheet, programMal) {
     if(extraMal.length <= 0) {
       break;
     }
-
+    
     // Write programmal title
     var extraMalTitle = sheet.getRange(loc.malText.row, (lastCol + 1), (loc.malNummer.rowEnd - loc.malText.row + 1), 1);
     lastCol += 1;
     extraMalTitle.getCell(1, 1).setValue(extraMalTyp);
     setFormattingMalTyp(extraMalTitle);
-
+    
     // Make writeable arrays
     var extraMalBeskrivningar = [];
     var extraMalNummer = [];
@@ -408,36 +400,36 @@ function writeProgramMalData(sheet, programMal) {
       extraMalNummer.push(i);
     }
     amountExtraMal = extraMalNummer.length;
-
+    
     // Calculate ranges to write values to
     var extraMalTextRange = sheet.getRange(loc.malText.row, (lastCol + 1), (loc.malText.rowEnd - loc.malText.row + 1), amountExtraMal);
     var extraMalTextValueRange = sheet.getRange(loc.malText.row, (lastCol + 1), 1, amountExtraMal);
     var extraMalNumRange = sheet.getRange(loc.malNummer.row, (lastCol + 1), (loc.malNummer.rowEnd - loc.malNummer.row + 1), amountExtraMal);
     var extraMalNumValueRange = sheet.getRange(loc.malNummer.row, (lastCol + 1), 1, amountExtraMal);
     lastCol += amountExtraMal;
-
+    
     // Write values
     extraMalTextValueRange.setValues([extraMalBeskrivningar]);
     extraMalNumValueRange.setValues([extraMalNummer]);
-
+    
     // Set layout
     setFormattingMalText(extraMalTextRange);
     setFormattingMalNum(extraMalNumRange);
     amountMal += 1 + amountExtraMal;
-
+    
     // Placement
     var startCol = extraMalTextRange.getColumn();
     var endCol = extraMalTextRange.getLastColumn();
     // malData.push({typId:i, typ:extraMalTyp, startCol:startCol, endCol:endCol, amount:(amountExtraMal + 1)});
-
+    
     // Save placement
     var malPlacement = new ProgramMalPlacement(i, extraMalTyp, startCol, endCol, (amountExtraMal + 1));
     malData.push(malPlacement);
   }
-
+  
   // Set width of all columns that were written to
   sheet.setColumnWidths(loc.malText.col, amountMal, 150);
-
+  
   return malData;
 }
 */

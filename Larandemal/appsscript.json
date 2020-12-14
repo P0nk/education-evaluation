@@ -9,7 +9,7 @@
     "libraries": [{
       "userSymbol": "Common",
       "libraryId": "1MZMgSCWDKF9SRKpKUsh8mBepK00bKEdrpvYNgYRu2a0ydKy64zSESlEr",
-      "version": "5"
+      "version": "10"
     }]
   },
   "exceptionLogging": "STACKDRIVER",

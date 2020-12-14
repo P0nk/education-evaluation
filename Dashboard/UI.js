@@ -15,6 +15,7 @@ function createMenu() {
       .addItem(menu.subTitleLoad, 'dialogLoadData')
       .addItem(menu.subTitleInit, 'dialogInitializeSheet')
       //.addItem('Clear', 'warningClear')
+      /*
       .addSubMenu(ui.createMenu('Developer')
         //.addItem('activate selected larandemal', 'activateLarandemal')
         //.addItem('deactivate selected larandemal', 'deactivateLarandemal')
@@ -24,6 +25,7 @@ function createMenu() {
         .addItem('Lägg till blad-metadata', 'Common.addSheetMetadata')
         .addItem('Ta bort bok-metadata', 'Common.deleteSpreadsheetMetadata')
         .addItem('Ta bort blad-metadata', 'Common.deleteSheetMetadata'))
+      */
       .addToUi(); 
 }
 

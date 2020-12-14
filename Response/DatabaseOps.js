@@ -71,14 +71,16 @@ function insertAnswers(con, formId, records) {
         'AND lm.version = ?))';
   var statement = con.prepareStatement(query);
   statement.setString(2, formId);
+  Logger.log('formId:<%s>', formId);
   
   for(var i = 0; i < records.length; i++) {
     var responseId = records[i].responseId;
     statement.setString(1, responseId);
+    Logger.log('responseId:<%s>', responseId);
     
     var responseRecords = records[i].records;
     for(var j = 0; j < responseRecords.length; j++) {
-      //Logger.log('ResponseRecords:<%s>', responseRecords[j]);
+      Logger.log('responseRecord:<%s>', responseRecords[j]);
       var bloom = responseRecords[j].bloom;
       var number = responseRecords[j].number;
       var version = responseRecords[j].version;
