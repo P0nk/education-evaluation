@@ -98,12 +98,16 @@ function parseRows(sheet, levels) {
       var columnIndex = question.columnIndexStart + j - 1; // columns are 1-indexed, therefore -1
       var value = data[i][columnIndex];
       
-      if(value.toString().trim()) {
-        var answer = extractAnswers(value);
-      } else {
-        var answer = [];
-      }
-      response.answers[j] = answer;
+      var answer = {
+        bloomLevel: levels[j],
+        markedAnswers: []
+      };
+      
+      if(value.toString().trim()) { // If there's content in the cell
+        answer.markedAnswers = extractAnswers(value);
+      } 
+      
+      response.answers.push(answer); // Should be explicit with what bloom level it is, not just use loop index. answer should be an object instead of list.
     } 
     responses.push(response);
   }
@@ -262,11 +266,13 @@ function convertToRecords(responseObjects) {
     
     // The 'answers' array will be unwinded into multiple records
     for(var j = 0; j < answers.length; j++) {
-      var bloomLevel = j + 1;
+      var answer = answers[j];
+      var bloomLevel = answer.bloomLevel; // Should read 'bloomLevel' from the answer object (not same as Answer in Datastructures.gs) instead
       
-      for(var k = 0; k < answers[j].length; k++) {
-        var number = answers[j][k].number;
-        var version = answers[j][k].version;
+      var markedAnswers = answer.markedAnswers;
+      for(var k = 0; k < markedAnswers.length; k++) {
+        var number = markedAnswers[k].number;
+        var version = markedAnswers[k].version;
         var lm = new Larandemal(bloomLevel, number, version);
         
         // Find index of object with current responseId

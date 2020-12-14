@@ -20,11 +20,11 @@ function insertResponses(con, formId, responses) {
   statement.setString(1, formId);
   
   for(var i = 0; i < responses.length; i++) {
-    var object = responses[i];
-    var timestamp = object.timestamp;
+    var response = responses[i];
+    var timestamp = response.timestamp;
     //var timestamp = getSqlTimestamp(timestampSheet);
-    var name = object.name;
-    var course = object.course;
+    var name = response.name;
+    var course = response.course;
     
     statement.setString(2, name);
     statement.setString(3, course);
