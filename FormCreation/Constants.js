@@ -10,7 +10,7 @@ var newForm = {
   kursPattern: '[A-Z0-9]{6}',
   kursPatternDesc: 'Måste innehålla 6 tecken. Endast siffror eller stora bokstäver.',
   nameTitle: 'Namn',
-  nameDesc: 'Ange ditt för- och efternamn',
+  nameDesc: 'Ange ditt för- och efternamn. Dessa personliga uppgifter är endast synliga för den som skickade ut formuläret, för att vid behov kunna kontakta och stämma av.',
   questionTitlePrefix: 'Examensmål ',
   questionPrefix: 'Nivå ',
   questionSeparator: ': '
